@@ -1,0 +1,6 @@
+MagickImage (install convert)
+GhostScript pour convert fichier .ps (GNU Licence)
+convert output.ps output.png
+PIL = conda install -c anaconda pillow
+tkinter = conda install -c anaconda tkinter
+nltk = condda install -c anaconda nltk
