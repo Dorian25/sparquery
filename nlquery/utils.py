@@ -1,6 +1,6 @@
 from datetime import datetime
 from .arrow import *
-
+import json
 
 def conv_to_str(value):
     if isinstance(value, datetime):
@@ -85,3 +85,10 @@ def confirmMatches(search, txt) :
             isResultMatch.append(False)
             
     return isResultMatch
+
+# Param : fichier json
+# Return : convertit le fichier json en dictionnaire python
+def parseJson(jsonFileName):
+    jsonFile = open(jsonFileName)
+    jsonStr = jsonFile.read()
+    return json.loads(jsonStr)

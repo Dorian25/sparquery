@@ -4,6 +4,7 @@ from .lango.parser import StanfordServerParser
 from .pattern.text.en import singularize
 from .wikidata import WikiData
 from .utils import first
+from .utils import parseJson
 from .api_adapter import LoggingInterface
 from .answer import Answer
 
@@ -322,6 +323,13 @@ class NLQueryEngine(LoggingInterface):
 
         return sent
 
+    def yes_no_query(self, subject, prop=None, subject2=None):
+        print("dans le yes_no_query")
+        print("subject : ",subject)
+        print("prop : ",prop)
+        print("subject2 : ", subject2)
+        return self.wd.yes_no_get_property(subject,subject2,prop)
+
     def query(self, sent, format_='plain'):
    
         """Answers a query
@@ -342,14 +350,25 @@ class NLQueryEngine(LoggingInterface):
         """
         sent = self.preprocess(sent)
         tree = self.parser.parse(sent)
+        
+        """
+        Alternative où les règles sont stockées dans un fichier json
+        Attention à l'encodage du chemin du fichier sachant qu'on est en python 2
+        """
+        rules_wh = parseJson("C:/Users/wuwen/Desktop/rules_wh.json")
+        rules_yesno = parseJson("C:/Users/wuwen/Desktop/rules_yesno.json")
+    
   
         #context = {'query': sent, 'tree': tree}
         #self.info(tree)
-        context1 = match_rules(tree, self.find_entity_rules, self.find_entity_query, self.matched_rule1)
-        context2 = match_rules(tree, self.subject_prop_rules, self.subject_query, self.matched_rule2)
+        context1 = match_rules(tree, rules_wh["find_entity_rules"][0], self.find_entity_query, self.matched_rule1)
+        context2 = match_rules(tree, rules_wh["subject_prop_rules"][0], self.subject_query, self.matched_rule2)
+        contextYesNo = match_rules(tree, rules_yesno["yes_no_rules"][0], self.yes_no_query)
 
         ans1 = context1
         ans2 = context2
+        ansYesNo = contextYesNo
+        
         print(ans1)
         print(self.matched_rule1)
         print(ans2)
@@ -357,7 +376,14 @@ class NLQueryEngine(LoggingInterface):
         
         if format_ == 'raw':
             
-            if ans2 == None and ans1 == None :
+            if ans1 == None and ans2 == None and ansYesNo != None:
+            
+                print("ans1 none ans2 none ansYesNo not_none")
+                ansYesNo.query = sent
+                ansYesNo.tree = str(tree)
+                return ansYesNo.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+            
+            elif ans2 == None and ans1 == None :
                 
                 print("ans1 none ans2 none")
                 ansNone = Answer()
@@ -378,6 +404,7 @@ class NLQueryEngine(LoggingInterface):
                 ans1.query = sent
                 ans1.tree = str(tree)
                 return ans1.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+            
             
             else :
                 print("2 ANSWERS")

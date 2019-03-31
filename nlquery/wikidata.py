@@ -8,7 +8,6 @@ from .answer import Answer
 
 
 #ajout du feedback
-
 class WikiDataAnswer(Answer):
     """Answer object from WikiData source"""
 
@@ -166,7 +165,7 @@ class WikiData(RestAdapter):
             if True in booleanMatches:
                 #le premier resultat de la recherche est retourné
                 idName = dget(item, 'search.%d.id'%booleanMatches.index(True))
-            
+                print("voici l'idname retourné ... ",idName)
             suggestions = getSuggestions(search)
                 
         return idName, suggestions
@@ -234,6 +233,13 @@ class WikiData(RestAdapter):
                 result =  self._query_wdsparql(query)
                 print(result)
                 bindings = dget(result, 'results.bindings')
+                
+                if bindings == [] and prop_id == 'P20':
+                    return WikiDataAnswer(None, None, data='yes')
+        
+                elif (bindings and prop_id == 'P20'):
+                    return WikiDataAnswer(None, None, data='no')
+                
                 answer.sparql_query = query
                 answer.bindings = bindings
                 answer.data = WikiDataAnswer.get_data(bindings)
@@ -393,6 +399,7 @@ class WikiData(RestAdapter):
         return WikiDataAnswer(**result)
 
 
+
     def get_property(self, qtype, subject, prop):
         """Gets property of subject from Wikidata
 
@@ -430,6 +437,9 @@ class WikiData(RestAdapter):
         if prop == 'height':
             prop_id = 'P2044,P2048'
 
+        if prop == 'alive':
+            prop_id = 'P20'
+
         if prop in ['nickname', 'known as', 'alias', 'called']:
             return self._get_aliases(subject)
 
@@ -462,3 +472,101 @@ class WikiData(RestAdapter):
         ans = self._find_entity(qtype, inst, props)
 
         return ans
+    
+    def _get_id_for_yes_no(self, name, _type='item'):
+        """Get WikiData ID of a name"""
+        item = self._search_entity(name, _type)
+        print("itemmmmmmmmmm : ",item)
+        return dget(item, 'search.0.id')
+    
+    def yes_no_get_property(self, subject, subject2=None, prop=None):
+        
+        prop_id = None
+        
+        if prop == 'alive':
+            prop_id = 'P20'
+            
+        if prop == 'taller':
+            prop_id = 'P2048'
+            
+        print("dejkdjfe : ",prop_id)    
+        print("sub : ",subject)
+        print("sub2 : ",subject2)
+        
+        return self._yes_no_get_property(subject, subject2, prop, prop_id=prop_id)
+    
+    def _yes_no_get_property(self, subject, subject2=None, prop=None, prop_id=None):
+        
+        print("je sios dans _yes_no_getçproperty")
+        
+        """Queries Wikidata to get property"""
+        self.debug('{0}, {1}', subject, prop)
+        
+        subject_id = self._get_id_for_yes_no(subject, 'item')
+        subject2_id = self._get_id_for_yes_no(subject2, 'item')
+        
+        print("this is the subj id 1 : ",subject_id)
+        
+        print("this is the subj id 2 : ",subject2_id)
+        
+        if not prop_id:
+            prop_id = self._get_id_for_yes_no(prop, 'property')
+
+        print("from get_property, subject id : ",subject_id)
+        print("from get_property, subject id2 : ",subject2_id)
+        print("from get_property pro id : ", prop_id)
+
+        # test predicat 'place of death'
+        if prop_id == 'P20':
+            
+            my_query = """
+                ASK { wd:%s p:%s ?prop }""" % (subject_id,prop_id)
+                
+            result_query = self._query_wdsparql(my_query)
+        
+            return WikiDataAnswer(sparql_query=my_query, data = not(result_query['boolean']))
+        
+        if prop_id == None:
+            
+            my_query = """
+                ASK { wd:%s ?p wd:%s}""" % (subject_id,subject2_id)
+        
+            result_query = self._query_wdsparql(my_query)
+        
+            return WikiDataAnswer(sparql_query=my_query, data = result_query['boolean'])
+        
+        if prop == 'developed':
+            
+            query = """
+                SELECT ?valLabel ?type
+                WHERE {
+                """
+            sub_queries = []
+            for pid in prop_id.split(','):
+                sub_query = """{
+                    wd:%s p:%s ?prop . 
+                    ?prop ps:%s ?val .
+                    OPTIONAL {
+                        ?prop psv:%s ?propVal .
+                        ?propVal rdf:type ?type .
+                    }
+                }""" % (subject_id, pid, pid, pid) 
+                sub_queries.append(sub_query)
+            query += ' UNION '.join(sub_queries)
+            query += """
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} 
+            }
+            """
+
+            result =  self._query_wdsparql(query)
+            bindings = dget(result, 'results.bindings')
+            
+            for i in range(len(bindings)):
+                for key, item in bindings[i].items():
+                    if bindings[i][key]['value'].lower() == subject2:
+                        return WikiDataAnswer(None, None, data='yes')
+
+            return WikiDataAnswer(None, None, data='no')
+        
+        
+        return WikiDataAnswer(sparql_query=query, bindings=bindings)
