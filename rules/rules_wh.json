@@ -1,0 +1,105 @@
+{
+    "subj_rules" : [
+        {
+            "( NP ( NP:subject-o ) ( VP:prop-o ) )": {},
+            "( NP ( NP:prop-o ) ( PP ( IN ) ( NP:subject-o ) ) )": {},
+            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+            "( NP:subject-o )": {}
+            
+        }
+    ],
+    
+    "subject_prop_rules" : [
+        {
+            "( SBARQ ( WHNP/WHADVP/WHADJP:qtype_t ) ( SQ:sq_t ) )": {
+                "qtype_t": {
+                    "( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) )": {},
+                    "( WHADJP ( WRB:qtype-o ) ( JJ:jj-o ) )": {},
+                    "( WHNP/WHADVP:qtype-o )": {}
+                },
+                "sq_t": {
+                    "( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) )": {},
+                    "( SQ ( VBD:action-o ) ( NP:subj_t ) ( VP:prop-o ) )": {
+                        "subj_t": {
+                            "( NP ( NP:subject-o ) ( VP:prop-o ) )": {},
+                            "( NP ( NP:prop-o ) ( PP ( IN ) ( NP:subject-o ) ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP:subject-o )": {}
+                        }
+                    },
+                    "( SQ ( VP ( VBZ/VBD/VBP:action-o ) ( NP:subj_t ) ) )": {
+                        "subj_t": {
+                            "( NP ( NP:subject-o ) ( VP:prop-o ) )": {},
+                            "( NP ( NP:prop-o ) ( PP ( IN ) ( NP:subject-o ) ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP:subject-o )": {}
+                        }
+                    },
+                    "( SQ ( VBZ:action-o ) ( NP:subj_t ) ( VP:prop-o ) )": {
+                        "subj_t": {
+                            "( NP ( NP:subject-o ) ( VP:prop-o ) )": {},
+                            "( NP ( NP:prop-o ) ( PP ( IN ) ( NP:subject-o ) ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP:subject-o )": {}
+                        }
+                    },
+                    "( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subj_t ) )": {
+                        "subj_t": {
+                            "( NP ( NP:subject-o ) ( VP:prop-o ) )": {},
+                            "( NP ( NP:prop-o ) ( PP ( IN ) ( NP:subject-o ) ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/NNS:prop-o ) $ )": {},
+                            "( NP ( NP:subject-o ( NNP ) ( NNP ) ( POS ) ) ( NN/JJ:prop-o ) ( NN/NNS:prop2-o ) )": {},
+                            "( NP:subject-o )": {}
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    
+    "prop_rules" : [
+        {
+            "( SQ/VP ( VB/VBP/VBD ) ( VP ( VBN:prop-o ) ( PP ( IN:op-o ) ( NP:value-o ) ) ) )": {},
+            "( SQ/VP ( VB/VBP/VBD=are ) ( PP ( IN:op-o ) ( NP:value-o ) ) )": {},
+            "( SQ/VP ( VB/VBP/VBD:prop-o ) ( PP ( IN:op-o ) ( NP:value-o ) ) )": {},
+            "( SQ/VP ( VB/VBP/VBD ) ( NP ( NP:prop-o ) ( PP ( IN:op-o ) ( NP/CD/JJ:value-o ) ) ) )": {},
+            "( SQ/VP ( VB/VBP/VBD ) ( NP:prop-o ) ( NP ( QP ( JJR:op-o ) ( IN ) ( CD:value-o ) ) ) )": {},
+            "( SQ/VP ( VB/VBP/VBD ) ( NP ( QP ( JJR:op-o ) ( IN=than ) ( NP/CD/JJ:value-o ) ) ( NNS:value_units-o ) ) )": {},
+            "( PP ( IN:op-o ) ( NP ( NP:value-o ) ( PP:pp_t ) ) )": {},
+            "( PP ( IN:op-o ) ( NP:value-o ) )": {}
+        }
+    ],
+    
+    "find_entity_rules" : [
+        {
+            "( SBARQ ( WHNP ( WHNP ( WHADJP:qtype-o ) ( NNS:inst-O ) ) ( PP:prop_match_t ) ) )": {},
+            "( SBARQ ( WHNP:qtype-o=who ) ( SQ:sq_t ) )": {
+                "sq_t": {
+                    "( SQ ( VBD/VBZ ) ( NP ( NP:inst-O ) ( PP:prop_match_t ) ) )": {}
+                }
+            },
+            "( SBARQ ( WHNP ( WHADJP/WDT/WHNP:qtype-o ) ( NNS/NN/NP:inst-O ) ) ( SQ:sq_t ) )": {
+                "sq_t": {
+                    "( SQ ( VBP ) ( NP ( EX=there ) ) )": {},
+                    "( SQ ( VP ( VP:prop_match_t ) ( CC ) ( VP:prop_match2_t ) ) )": {},
+                    "( SQ ( VP:prop_match_t ) )": {},
+                    "( SQ:prop_match_t )": {}
+                }
+            }
+        }
+    ]
+}
