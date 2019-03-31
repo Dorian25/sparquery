@@ -355,8 +355,8 @@ class NLQueryEngine(LoggingInterface):
         Alternative où les règles sont stockées dans un fichier json
         Attention à l'encodage du chemin du fichier sachant qu'on est en python 2
         """
-        rules_wh = parseJson("C:/Users/wuwen/Desktop/rules_wh.json")
-        rules_yesno = parseJson("C:/Users/wuwen/Desktop/rules_yesno.json")
+        rules_wh = parseJson("rules/rules_wh.json")
+        rules_yesno = parseJson("rules/rules_yesno.json")
     
   
         #context = {'query': sent, 'tree': tree}

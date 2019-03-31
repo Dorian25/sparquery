@@ -486,7 +486,7 @@ class WikiData(RestAdapter):
         if prop == 'alive':
             prop_id = 'P20'
             
-        if prop == 'taller':
+        if prop == 'taller' or prop == "higher":
             prop_id = 'P2048'
             
         print("dejkdjfe : ",prop_id)    
@@ -515,6 +515,8 @@ class WikiData(RestAdapter):
         print("from get_property, subject id : ",subject_id)
         print("from get_property, subject id2 : ",subject2_id)
         print("from get_property pro id : ", prop_id)
+
+       
 
         # test predicat 'place of death'
         if prop_id == 'P20':
