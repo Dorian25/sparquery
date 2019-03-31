@@ -515,8 +515,21 @@ class WikiData(RestAdapter):
         print("from get_property, subject id : ",subject_id)
         print("from get_property, subject id2 : ",subject2_id)
         print("from get_property pro id : ", prop_id)
+        
+        
 
-       
+        if prop_id == 'P2048' :
+            left_retrieve = """
+            SELECT ?val
+            WHERE {
+                    wd:%s p:%s ?val
+            }
+            """ % (subject_id,prop_id)
+            
+            result_left_query = self._query_wdsparql(left_retrieve)
+            
+            print("voiici le res left retri : ",result_left_query)
+            
 
         # test predicat 'place of death'
         if prop_id == 'P20':
