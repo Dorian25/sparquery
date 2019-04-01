@@ -486,7 +486,7 @@ class WikiData(RestAdapter):
         if prop == 'alive':
             prop_id = 'P20'
             
-        if prop == 'taller' or prop == "higher":
+        if prop == 'taller' or prop == 'higher':
             prop_id = 'P2048'
             
         print("dejkdjfe : ",prop_id)    
@@ -522,14 +522,30 @@ class WikiData(RestAdapter):
             left_retrieve = """
             SELECT ?val
             WHERE {
-                    wd:%s p:%s ?val
+                    wd:%s wdt:%s ?val
             }
             """ % (subject_id,prop_id)
             
             result_left_query = self._query_wdsparql(left_retrieve)
             
-            print("voiici le res left retri : ",result_left_query)
+            print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
             
+            right_retrieve = """
+            SELECT ?val
+            WHERE {
+                    wd:%s wdt:%s ?val
+            }
+            """ % (subject2_id,prop_id) 
+            
+            result_right_query = self._query_wdsparql(right_retrieve)
+            
+            if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
+                return WikiDataAnswer(None, None, data='yes')
+            
+            else:
+                return WikiDataAnswer(None, None, data='no')
+            
+            # return WikiDataAnswer(sparql_query=left_retrieve, data = not(result_left_query['boolean']))
 
         # test predicat 'place of death'
         if prop_id == 'P20':
