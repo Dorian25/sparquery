@@ -1,8 +1,9 @@
 {
     "yes_no_rules" : [
         {
-            "( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( ADJP ( JJ:prop-o ) ) )": {},
-            "( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )": {},
+            "( SQ ( VBZ/VBD/VBP ) ( NP:subject-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ) ) )" : {},
+            "( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( ADJP ( JJ:prop-o ) ) )" : {},
+            "( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )" : {},
             "( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( VP ( VBN:prop-o ) ( PP ( IN ) ( NP:subject2-o ( NNP ) ( NNPS ) ) ) ) )" : {},
             "( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )" : {},
             "( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )" : {}
