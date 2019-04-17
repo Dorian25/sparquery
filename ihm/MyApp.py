@@ -13,6 +13,7 @@ from .SparqlQueryFrame import SparqlQueryFrame
 from .AnswerFrame import AnswerFrame
 from .AskMeQuestionFrame import AskMeQuestionFrame
 from .DidYouMeanFrame import DidYouMeanFrame
+from .HistoryFrame import HistoryFrame
 
 class MyApp(Tk) :
     
@@ -26,9 +27,6 @@ class MyApp(Tk) :
         ##############################################
         #Style########################################
         ##############################################
-        
-        s_framevide = Style()
-        s_framevide.configure("Framevide.TFrame",background="#293C5A")
                              
         s_notebook = Style()
         s_notebook.configure("TNotebook.Tab",font=('Arial', 12, 'bold'),
@@ -70,12 +68,14 @@ class MyApp(Tk) :
         self.answerFrame = AnswerFrame(self.tabs)
         self.sparqlFrame = SparqlQueryFrame(self.tabs)
         self.didYouMeanFrame = DidYouMeanFrame(self.tabs)
+        self.historyFrame = HistoryFrame(self.tabs)
 
         self.askMeQuestionFrame.treeQuery = self.treeQueryFrame
         self.askMeQuestionFrame.treeRule = self.treeRulesFrame
         self.askMeQuestionFrame.sparqlQuery = self.sparqlFrame
         self.askMeQuestionFrame.answer = self.answerFrame  
         self.askMeQuestionFrame.suggestion = self.didYouMeanFrame
+        self.askMeQuestionFrame.history = self.historyFrame
         
         ##############################################
         #Parametrage du notebook pour ajouter tous les onglets et les fenetres
@@ -84,6 +84,7 @@ class MyApp(Tk) :
         self.tabs.add(self.sparqlFrame, text="SPARQL Query".upper())
         self.tabs.add(self.left, text="POS Tags Tree".upper())
         self.tabs.add(self.didYouMeanFrame, text="Did you mean".upper())
+        self.tabs.add(self.historyFrame, text="History".upper())
         #ajouter onglet Existed property (listant toutes les proprietes d'un subject)
         self.tabs.pack(expand=1, fill=BOTH) 
         

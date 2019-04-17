@@ -9,6 +9,7 @@ class Answer(object):
         self.params = {}
         self.tree = None
         self.feedback = {}
+        self.correct = None
 
     def to_plain(self):
         if isinstance(self.data, list):
