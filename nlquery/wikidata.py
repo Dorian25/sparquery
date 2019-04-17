@@ -141,15 +141,14 @@ class WikiData(RestAdapter):
     def _get_id(self, name, _type='item'):
         """Get WikiData ID of a name"""
    
-        idName = None
+        idsName = None
         suggestions = []
         
         item = self._search_entity(name, _type)
-        print("ITEM-_get_id_",item)
+        print(_type+"-_get_id_",item)
         
         #tableau correspondant aux resultats de la recherche
-        search = dget(item, "search")
-        
+        search = dget(item, "search") 
         print(search)
         
         #la recherche n'a rien donné
@@ -160,15 +159,19 @@ class WikiData(RestAdapter):
         else :
             print("search id full")
             #on verifie qu'il a bien trouvé ce qu'on cherche cad subject
+            #text_search == subject
             booleanMatches = confirmMatches(search, name)
             print(booleanMatches)
+            #il peut y avoir plusieurs matches donc on renvoie tous les matchs
             if True in booleanMatches:
-                #le premier resultat de la recherche est retourné
-                idName = dget(item, 'search.%d.id'%booleanMatches.index(True))
-                print("voici l'idname retourné ... ",idName)
+                #le premier match est retourné
+                #au lieu de retourner le premier, on doit verifier que les
+                #matchs ont la propriete demandée
+                idsName = [dget(item, 'search.%d.id'%i) for i in range(len(booleanMatches)) if booleanMatches[i]]
+                print("voici les idsname retournés ... ",idsName)
             suggestions = getSuggestions(search)
                 
-        return idName, suggestions
+        return idsName, suggestions
 
 
     def _get_property(self, subject, prop, prop_id=None):
@@ -176,39 +179,63 @@ class WikiData(RestAdapter):
         print("GET PROPERTY")
         
         answer = WikiDataAnswer(sparql_query=None)
+        
         subj_id_found = False
         prop_id_found = False
+        prop_id_given = False
         sugg_prop = []
+        list_prop_id = []
         
+        list_subject_id, sugg_subj = self._get_id(subject, 'item')
         #on verifie au cas ou prop_id n'est pas definie
-        subject_id, sugg_subj = self._get_id(subject, 'item')
-        if not prop_id:
-            prop_id, sugg_prop = self._get_id(prop, 'property')
-        
-        if not subject_id :
+        if prop_id :
+            prop_id_given = True
+        else:
+            prop_id_given = False
+            list_prop_id, sugg_prop = self._get_id(prop, 'property')
+            
+        if not list_subject_id :
             answer.feedback["subject"] = "I did not find the subject : "+ subject.upper()
             answer.suggestions["subject"] = sugg_subj
             subj_id_found = False
         else :
-            answer.feedback["subject"] = "I found the subject : "+ subject.upper()
-            answer.sparql_desc[subject_id] = subject
+            answer.feedback["match_subj"] = "I found "+str(len(list_subject_id))+" result(s) related to the subject : "+ subject.upper()
             answer.suggestions["subject"] = sugg_subj
             subj_id_found = True
 
-        if not prop_id:
+        if not list_prop_id:
+            print("unknown prop")
             answer.feedback["property"] = "I did not find the property : " + prop.upper()
             answer.suggestions["prop"] = sugg_prop
             prop_id_found = False
         else :
-            answer.feedback["property"] = "I found the property : " + prop.upper()
-            answer.sparql_desc[prop_id] = prop
+            answer.feedback["match_property"] = "I found "+str(len(list_prop_id))+" result(s) related to the property : " + prop.upper()
             answer.suggestions["prop"] = sugg_prop
             prop_id_found = True
             
 
-        if subj_id_found and prop_id_found :
-            if self._is_property_of_subj(subject_id, prop_id) :
-
+        if subj_id_found and (prop_id_found or prop_id_given) :
+            
+            #on a une liste d'ids qui ont matché avec le sujet
+            #on a maintenant les filtrer pour savoir lequel a la prop demandée
+            subjHasProp = []
+            
+            if prop_id_given :
+                subjHasProp = [self._is_property_of_subj(s,prop_id) for s in list_subject_id]
+            else :
+                subjHasProp = [self._is_property_of_subj(s,list_prop_id[0]) for s in list_subject_id]
+            
+            if True in subjHasProp :
+                if not prop_id_given :
+                    prop_id = list_prop_id[0]
+                
+                subject_id = list_subject_id[subjHasProp.index(True)]
+                
+                answer.feedback["subject"] = "I found the subject : "+ subject.upper()
+                answer.sparql_desc[subject_id] = subject
+                answer.feedback["property"] = "I found the property : " + prop.upper()
+                answer.sparql_desc[prop_id] = prop
+                
                 query = """
                 SELECT ?valLabel ?type
                 WHERE {
@@ -435,7 +462,8 @@ class WikiData(RestAdapter):
                 prop_id = 'P569'
 
         if prop == 'height':
-            prop_id = 'P2044,P2048'
+            #prop_id = 'P2044,P2048'
+            prop_id = 'P2048'
 
         if prop == 'alive':
             prop_id = 'P20'

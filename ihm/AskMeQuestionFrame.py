@@ -66,5 +66,7 @@ class AskMeQuestionFrame(Frame):
                 self.sparqlQuery.setQuery(dictAns['sparql_query'], dictAns['sparql_desc'])
             else :
                 self.sparqlQuery.setQuery(None, None)
-                
-            self.suggestion.setSuggestion(dictAns['suggestions']['subject'], dictAns['suggestions']['prop'])
+            if 'suggestions' in dictAns:    
+                self.suggestion.setSuggestion(dictAns['suggestions']['subject'], dictAns['suggestions']['prop'])
+            else :
+                self.suggestion.setSuggestion([],[])
