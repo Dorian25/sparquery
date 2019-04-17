@@ -89,6 +89,6 @@ def confirmMatches(search, txt) :
 # Param : fichier json
 # Return : convertit le fichier json en dictionnaire python
 def parseJson(jsonFileName):
-    jsonFile = open(jsonFileName)
+    jsonFile = open(jsonFileName,"r")
     jsonStr = jsonFile.read()
     return json.loads(jsonStr)

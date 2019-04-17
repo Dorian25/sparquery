@@ -369,10 +369,11 @@ class NLQueryEngine(LoggingInterface):
         ans2 = context2
         ansYesNo = contextYesNo
         
-        print(ans1)
+        print("ans1 : ", ans1)
         print(self.matched_rule1)
-        print(ans2)
+        print("ans2 : ",ans2)
         print(self.matched_rule2)
+        print("ansyesno : ", ansYesNo)
         
         if format_ == 'raw':
             
