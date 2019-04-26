@@ -6,3 +6,5 @@ if __name__ == "__main__":
     
     process = subprocess.Popen('cd stanford && java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer',shell=True)
     MyApp().mainloop()
+    process.kill()
+    print("process killed")
