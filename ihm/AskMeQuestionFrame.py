@@ -21,7 +21,7 @@ class AskMeQuestionFrame(Frame):
         ##############################################
         
         super().__init__(parent, style="AskFrame.TFrame")
-        self.pack(fill=X, ipadx=20, ipady=20)
+        self.pack(fill=X, ipadx=15, ipady=20)
         
         ##############################################
         
@@ -38,7 +38,7 @@ class AskMeQuestionFrame(Frame):
         self.answerCorrect = StringVar()
         
         self.blocCorrect = Frame(self)
-        self.blocCorrect.pack(fill=X, side=BOTTOM, anchor=CENTER)
+        self.blocCorrect.pack(fill=X, side=BOTTOM)
         
         label = Label(self.blocCorrect,text="Is correct answer ?")
         r1 = Radiobutton(self.blocCorrect, text="Yes", variable=self.answerCorrect, value="yes", command=self.feedbackAnswer)
@@ -94,9 +94,12 @@ class AskMeQuestionFrame(Frame):
             self.pushEnter = True
             
             engine = NLQueryEngine('localhost', 9000)
-            self.dictAns,match_rule = engine.query(inputUser, format_='raw')
+            self.dictAns, match_rule = engine.query(inputUser, format_='raw')
             print(self.dictAns)
             
+            if not match_rule :
+                self.dictAns["feedback"]["no match"] = "This type of question was not recognized by the system"
+                
             self.answer.setAnswer(self.dictAns['plain'], self.dictAns["feedback"])
             self.treeQuery.setTreeQuery(self.dictAns['tree'])
             self.treeRule.setTreeQuery(match_rule)

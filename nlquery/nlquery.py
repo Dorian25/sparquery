@@ -7,6 +7,7 @@ from .utils import first
 from .utils import parseJson
 from .api_adapter import LoggingInterface
 from .answer import Answer
+from .rules.utils_rules import whichRulesMatched
 
 #from threading import local
 
@@ -161,6 +162,7 @@ class NLQueryEngine(LoggingInterface):
         self.wd = WikiData()
         self.matched_rule1 = []
         self.matched_rule2 = []
+        self.matched_rule3 = []
         
     def subject_query(self, qtype, subject, action, jj=None, prop=None, prop2=None, prop3=None):
         """Transforms matched context into query parameters and performs query
@@ -363,7 +365,7 @@ class NLQueryEngine(LoggingInterface):
         #self.info(tree)
         context1 = match_rules(tree, rules_wh["find_entity_rules"][0], self.find_entity_query, self.matched_rule1)
         context2 = match_rules(tree, rules_wh["subject_prop_rules"][0], self.subject_query, self.matched_rule2)
-        contextYesNo = match_rules(tree, rules_yesno["yes_no_rules"][0], self.yes_no_query)
+        contextYesNo = match_rules(tree, rules_yesno["yes_no_rules"][0], self.yes_no_query, self.matched_rule3)
 
         ans1 = context1
         ans2 = context2
@@ -382,7 +384,7 @@ class NLQueryEngine(LoggingInterface):
                 print("ans1 none ans2 none ansYesNo not_none")
                 ansYesNo.query = sent
                 ansYesNo.tree = str(tree)
-                return ansYesNo.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                return ansYesNo.to_dict(), whichRulesMatched(self.matched_rule3)
             
             elif ans2 == None and ans1 == None :
                 
@@ -390,21 +392,21 @@ class NLQueryEngine(LoggingInterface):
                 ansNone = Answer()
                 ansNone.query = sent
                 ansNone.tree = str(tree)
-                return ansNone.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                return ansNone.to_dict(), ''
                 
             elif ans1 == None and ans2 != None :
                                
                 print("ans1 none ans2 not_none")
                 ans2.query = sent
                 ans2.tree = str(tree)
-                return ans2.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                return ans2.to_dict(), whichRulesMatched(self.matched_rule2)
             
             elif ans2 == None and ans1 != None :
                 
                 print("ans1 not_none ans2 none")
                 ans1.query = sent
                 ans1.tree = str(tree)
-                return ans1.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                return ans1.to_dict(), whichRulesMatched(self.matched_rule1)
             
             
             else :

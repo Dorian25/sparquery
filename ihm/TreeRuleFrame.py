@@ -54,7 +54,9 @@ class TreeRuleFrame(LabelFrame):
         os.system("convert %s %s" % (self.filenamePS, self.filenamePNG))
             
     def setTreeQuery(self, treeVal):
-        if treeVal == None :
+        
+        #à l'ouverture de l'application ou si aucune regle n'a ete reconnue
+        if not treeVal :
         
             self.image = Image.open(self.filenameDefault)
             self.photo = ImageTk.PhotoImage(self.image)

@@ -90,5 +90,5 @@ class MyApp(Tk) :
         
         ##############################################
         #barre de status
-        self.statusBar = Label(self,text="Welcome ", anchor=W, relief=SUNKEN, borderwidth=1)
-        self.statusBar.pack(fill=X, side=BOTTOM) 
+        #self.statusBar = Label(self,text="Welcome ", anchor=W, relief=SUNKEN, borderwidth=1)
+        #self.statusBar.pack(fill=X, side=BOTTOM) 

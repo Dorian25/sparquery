@@ -30,7 +30,7 @@ class JsonHandler(tornado.web.RequestHandler):
                 json_data = json.loads(self.request.body)
                 self.request.arguments.update(json_data)
             except ValueError:
-                print '%s' % str(self.request.body)
+                print('%s' % str(self.request.body))
                 message = 'Unable to parse JSON.'
                 self.send_error(400, message=message) # Bad Request
 
@@ -99,7 +99,7 @@ def make_app():
 if __name__ == "__main__":
     parse_command_line()
     app = make_app()
-    print "Running at localhost:8888"
+    print("Running at localhost:8888")
     server = gevent.wsgi.WSGIServer(('', 8888), app)
     server.serve_forever()
 
