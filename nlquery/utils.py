@@ -1,6 +1,7 @@
 from datetime import datetime
 from .arrow import *
 import json
+import re
 
 def conv_to_str(value):
     if isinstance(value, datetime):
@@ -92,3 +93,27 @@ def parseJson(jsonFileName):
     jsonFile = open(jsonFileName,"r")
     jsonStr = jsonFile.read()
     return json.loads(jsonStr)
+
+# Param fileName : fichier du dataset à charger
+# Return dataset : dictionnaire contenant les queries
+def loadDataset(fileName):
+    dataset = dict()
+    if fileName == "dataset/annotated_wd_data_train.txt":
+        file = open(fileName,'r',encoding="utf8")
+        i = 0
+        for line in file:
+            dataset[i] = re.split(r'[\n\t]+', line)
+            i += 1
+    elif fileName == "dataset/qald-7-test-en-wikidata-withoutanswers.json":
+        file = parseJson(fileName)
+        j = 0
+        for key,item in file.items():
+            if key == "questions":
+                for i in item:
+                    dataset[j] = i["question"][0]["string"]
+                    j += 1
+    else:
+        print("fileName not implemented")
+        return None
+    return dataset
+        
