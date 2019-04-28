@@ -1,0 +1,8 @@
+{
+    "order" : [
+        {
+            "( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )" : {}
+            
+        }
+    ]
+}
