@@ -500,6 +500,229 @@ class WikiData(RestAdapter):
 
         return ans
     
+    # Param prop : property à vérifier s'il est connu ou non
+    # Return propIds : liste des ids du prop
+    def getKnownProp(self,prop):
+        sizeWords = ['taller','higher','lower','shorter','smaller','less','bigger']
+        lifeWords = ['alive','dead']
+        propIds = []
+        if prop in sizeWords:
+            propIds.append('P2046')
+            propIds.append('P2048')
+        if prop in lifeWords:
+            propIds.append('P20')
+        return propIds
+    
+    # Param name : nom auquel on veut récupérer les ids
+    # Return ids : liste des ids du name
+    def getIds(self, name):
+        ids = []
+        item = self._search_entity(name)
+        search = dget(item,"search")
+        for i in search:
+            ids.append(i['id'])
+        return ids
+    
+    # Param subject1 : premier sujet en langage naturel
+    # Param subject2 : deuxieme sujet en langage naturel
+    # Param prop : propriete en langage naturel
+    def getAnswer(self,subject1,subject2=None,prop=None):
+        
+        """
+            Dans un premier temps on récupère les ids des paramètres
+        """
+        
+        # retrieving ids of subject1
+        subj1Ids = self.getIds(subject1)
+        if subject2 != None:
+            # retrieving ids of subject2
+            subj2Ids = self.getIds(subject2)
+        if prop != None:
+            propIds = self.getKnownProp(prop)
+            # if the prop is unknown 
+            if len(propIds) == 0:
+                # retrieving ids of prop
+                propIds = self.getIds(prop)
+        
+        """
+            Formulation de la requête SPARQL
+        """
+        if prop == None:
+            # cas subject1 - subject2
+            if len(subj1Ids) > 0 and len(subj2Ids) > 0:
+                for idS1 in subject1:
+                    for idS2 in subject2:
+                        query = """
+                            ASK { { wd:%s ?p wd:%s } UNION { wd:%s ?p2 wd:%s } } """ % (idS1,idS2,idS2,idS1)
+        
+                        result =  self._query_wdsparql(query)
+                        if len(result['boolean']) > 0:
+                            if result['boolean'] == True:
+                                return WikiDataAnswer(None, None, data='yes')
+                            else:
+                                return WikiDataAnswer(None, None, data='no')
+            
+        else:
+            # cas subject - prop
+            if len(subj1Ids) > 0 and subject2==None:
+                self.getAnswerSP(subj1Ids,propIds,prop)
+            # cas comparatif : subject1 - prop - subject2
+            elif len(subj1Ids) > 0 and len(subj2Ids) > 0 and prop in ['taller','higher','lower','shorter','smaller','less','bigger']:
+                #self.getAnswerCompareS1S2P(subj1Ids,subj2Ids,propIds,prop)
+                # pour éviter les problèmes d'indices
+                liste = [len(subj1Ids),len(subj2Ids)]
+                ite = sorted(liste)[0]
+                for i in range(len(propIds)):
+                    for j in range(ite):
+                        left_retrieve = """
+                            SELECT ?val
+                            WHERE {
+                                wd:%s wdt:%s ?val
+                            }
+                            """ % (subj1Ids[j],propIds[i])
+                                
+                        result_left_query = self._query_wdsparql(left_retrieve)
+                                
+                        #print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
+                                
+                        right_retrieve = """
+                        SELECT ?val
+                        WHERE {
+                            wd:%s wdt:%s ?val
+                        }
+                        """ % (subj2Ids[j],propIds[i]) 
+                        
+                        result_right_query = self._query_wdsparql(right_retrieve)
+                        
+                        #print("voiici le res right retri : ",result_right_query['results']['bindings'][0]['val']['value'])
+                        print("---------------------------")
+                        print(result_left_query)
+                        print(result_right_query)
+                                
+                        if len(result_left_query['results']['bindings']) != 0 and len(result_right_query['results']['bindings']) != 0:
+                            if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
+                                if (prop in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                                    return WikiDataAnswer(None, None, data='yes')
+                                
+                                else:
+                                    return WikiDataAnswer(None, None, data='no')
+                            else:
+                                if (prop in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                                    return WikiDataAnswer(None, None, data='no')
+                                    
+                                else:
+                                    return WikiDataAnswer(None, None, data='yes')
+            else:
+                self.getAnswerS1S2P(subj1Ids,subj2Ids,propIds)
+            
+    # Param subject1 : liste des ids pour le sujet 1
+    # Param subject2 : liste des ids pour le sujet 2
+    def getAnswerS1S2(self,subject1,subject2):
+        for idS1 in subject1:
+            for idS2 in subject2:
+                query = """
+                    ASK { { wd:%s ?p wd:%s } UNION { wd:%s ?p2 wd:%s } } """ % (idS1,idS2,idS2,idS1)
+
+                result =  self._query_wdsparql(query)
+                if len(result['boolean']) > 0:
+                    if result['boolean'] == True:
+                        return WikiDataAnswer(None, None, data='yes')
+                    else:
+                        return WikiDataAnswer(None, None, data='no')
+    
+    
+    # Param subject : liste des ids du sujet
+    # Param prop : liste des ids de la propriete
+    # Return objet answer
+    def getAnswerSP(self,subject,prop,name):
+        print("th subbbbject : ",subject)
+        print(" prooop : ",prop)
+        for idS in subject:
+            for idP in prop:
+                my_query = """
+                    ASK { wd:%s p:%s ?prop }""" % (idS,idP)
+                result = self._query_wdsparql(my_query)
+                
+                if result['boolean'] == True:
+                    if name == 'alive':
+                        return WikiDataAnswer(None, None, data='no')
+                    elif name == 'dead':
+                        return WikiDataAnswer(None, None, data='yes')
+                    else:
+                        return WikiDataAnswer(None, None, data='yes')
+                else:
+                    if name == 'dead':
+                        return WikiDataAnswer(None, None, data='no')
+                    elif name == 'alive':
+                        return WikiDataAnswer(None, None, data='yes')
+                    else:
+                        return WikiDataAnswer(None, None, data='no')
+                    
+    # Param subject1 : liste des ids du premier sujet
+    # Param subject2 : liste des ids du deuxieme sujet
+    # Param prop : liste des ids de la propriete
+    # Return object answer
+    def getAnswerS1S2P(self,subject1,subject2,prop):
+        for idS1 in subject1:
+            for idP in prop:
+                for idS2 in subject2:
+                    query = """
+                        ASK { { wd:%s p:%s wd:%s } UNION { wd:%s p:%s wd:%s } } """ % (idS1,idP,idS2,idS2,idP,idS1)
+                    result = self._query_wdsparql(query)
+        
+                    if len(result['boolean']) > 0:
+                        if result['boolean'] == True:
+                            return WikiDataAnswer(None, None, data='yes')
+                        else:
+                            return WikiDataAnswer(None, None, data='no')
+                        
+                        
+    def getAnswerCompareS1S2P(self,subject1,subject2,prop,name):
+        # pour éviter les problèmes d'indices
+        liste = [len(subject1),len(subject2)]
+        ite = sorted(liste)[0]
+        for i in range(len(prop)):
+            for j in range(ite):
+                left_retrieve = """
+                    SELECT ?val
+                    WHERE {
+                        wd:%s wdt:%s ?val
+                    }
+                    """ % (subject1[j],prop[i])
+                        
+                result_left_query = self._query_wdsparql(left_retrieve)
+                        
+                #print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
+                        
+                right_retrieve = """
+                SELECT ?val
+                WHERE {
+                    wd:%s wdt:%s ?val
+                }
+                """ % (subject2[j],prop[i]) 
+                
+                result_right_query = self._query_wdsparql(right_retrieve)
+                
+                #print("voiici le res right retri : ",result_right_query['results']['bindings'][0]['val']['value'])
+                print("---------------------------")
+                print(result_left_query)
+                print(result_right_query)
+                        
+                if len(result_left_query['results']['bindings']) != 0 and len(result_right_query['results']['bindings']) != 0:
+                    if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
+                        if (name in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                            return WikiDataAnswer(None, None, data='yes')
+                        
+                        else:
+                            return WikiDataAnswer(None, None, data='no')
+                    else:
+                        if (name in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                            return WikiDataAnswer(None, None, data='no')
+                            
+                        else:
+                            return WikiDataAnswer(None, None, data='yes')
+    
+    
     def _get_id_for_yes_no(self, name, _type='item'):
         """Get WikiData ID of a name"""
         item = self._search_entity(name, _type)
@@ -508,7 +731,7 @@ class WikiData(RestAdapter):
         print("THIS IS SOME TESTS")
         data = self._search_entity(name)
         print("For subject 1 : ",dget(data,"search"))
-        
+        print("for the return : ",dget(item, 'search.0.id'))
         return dget(item, 'search.0.id')
     
     def yes_no_get_property(self, subject, subject2=None, prop=None):
@@ -540,6 +763,7 @@ class WikiData(RestAdapter):
         
         subject_id = self._get_id_for_yes_no(subject, 'item')
         subject2_id = self._get_id_for_yes_no(subject2, 'item')
+        
         
         print("this is the subj id 1 : ",subject_id)
         
@@ -621,6 +845,7 @@ class WikiData(RestAdapter):
                 return WikiDataAnswer(None, None, data='no')
         else:
             if (prop in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                print("jarrive ici")
                 return WikiDataAnswer(None, None, data='no')
                     
             else:
@@ -722,6 +947,12 @@ class WikiData(RestAdapter):
 # 
 #             return WikiDataAnswer(None, None, data='no')
 # =============================================================================
-        
-        
+        print("je suis quand meme la")
         return WikiDataAnswer(sparql_query=query, bindings=bindings)
+    
+    
+    
+                    
+                        
+            
+        
