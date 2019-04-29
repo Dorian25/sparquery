@@ -1,4 +1,5 @@
 from ihm.MyApp import MyApp
+from nlquery import utils
 #import subprocess
 
 if __name__ == "__main__":
@@ -10,3 +11,6 @@ if __name__ == "__main__":
     MyApp().mainloop()
     #process.kill()
     #print("process killed")
+    
+    #dataset1 = utils.loadDataset("dataset/annotated_wd_data_train.txt")
+    #dataset2 = utils.loadDataset("dataset/qald-7-test-en-wikidata-withoutanswers.json")
