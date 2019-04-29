@@ -600,35 +600,14 @@ class WikiData(RestAdapter):
         else:
             
             query = """
-                SELECT ?valLabel ?type
-                WHERE {
-                """
-            sub_queries = []
-            for pid in prop_id.split(','):
-                sub_query = """{
-                    wd:%s p:%s ?prop . 
-                    ?prop ps:%s ?val .
-                    OPTIONAL {
-                        ?prop psv:%s ?propVal .
-                        ?propVal rdf:type ?type .
-                    }
-                }""" % (subject_id, pid, pid, pid) 
-                sub_queries.append(sub_query)
-            query += ' UNION '.join(sub_queries)
-            query += """
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} 
-            }
-            """
+                        ASK { { wd:%s ?p wd:%s } UNION { wd:%s ?p2 wd:%s } } """ % (subject_id,subject2_id,subject2_id,subject_id)
 
             result =  self._query_wdsparql(query)
-            bindings = dget(result, 'results.bindings')
-            
-            for i in range(len(bindings)):
-                for key, item in bindings[i].items():
-                    if bindings[i][key]['value'].lower() == subject2:
-                        return WikiDataAnswer(None, None, data='yes')
-
-            return WikiDataAnswer(None, None, data='no')
+     
+            if result['boolean'] == True:
+                return WikiDataAnswer(None, None, data='yes')
+            else:
+                return WikiDataAnswer(None, None, data='no')
                     
         print("because of the prop : ",prop)
         
