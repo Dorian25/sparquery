@@ -106,7 +106,7 @@ class WikiData(RestAdapter):
         print("DATA-_get_desc_",data)
         #tableau correspondant aux resultats de la recherche
         search = dget(data, "search")
-        print(search)
+        print("SEARCH SEARVCH DESC: ",search)
         
         #la recherche n'a rien donné
         if len(search) == 0 :
@@ -148,7 +148,7 @@ class WikiData(RestAdapter):
         
         #tableau correspondant aux resultats de la recherche
         search = dget(item, "search") 
-        print(search)
+        print("SEARCH SEARVCH ID: ",search)
         
         #la recherche n'a rien donné
         if len(search) == 0 :
@@ -504,23 +504,28 @@ class WikiData(RestAdapter):
         """Get WikiData ID of a name"""
         item = self._search_entity(name, _type)
         print("itemmmmmmmmmm : ",item)
+        
+        print("THIS IS SOME TESTS")
+        data = self._search_entity(name)
+        print("For subject 1 : ",dget(data,"search"))
+        
         return dget(item, 'search.0.id')
     
     def yes_no_get_property(self, subject, subject2=None, prop=None):
         
+        sizeWords = ['taller','higher','lower','shorter','smaller','less','bigger']
         
-        sizeWords = ['taller','higher','lower','shorter','smaller','less']
-        
-        prop_id = None
+        prop_id = []
         
         if prop == 'alive':
-            prop_id = 'P20'
+            prop_id.append('P20')
             
         if prop in sizeWords:
-            prop_id = 'P2048'
+            prop_id.append('P2048')
+            prop_id.append('P2046')
             
         if prop == "older" or prop == "younger":
-            prop_id = 'P2000'
+            prop_id.append('P2000')
             
         print("dejkdjfe : ",prop_id)    
         print("sub : ",subject)
@@ -547,64 +552,52 @@ class WikiData(RestAdapter):
         print("from get_property, subject id2 : ",subject2_id)
         print("from get_property pro id : ", prop_id)
         
-        
-
-        if prop_id == 'P2048' :
-            left_retrieve = """
-            SELECT ?val
-            WHERE {
-                    wd:%s wdt:%s ?val
-            }
-            """ % (subject_id,prop_id)
-            
-            result_left_query = self._query_wdsparql(left_retrieve)
-            
-            print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
-            
-            right_retrieve = """
-            SELECT ?val
-            WHERE {
-                    wd:%s wdt:%s ?val
-            }
-            """ % (subject2_id,prop_id) 
-            
-            result_right_query = self._query_wdsparql(right_retrieve)
-            
-            if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
-                if (prop in ['taller','higher']):
-                    return WikiDataAnswer(None, None, data='yes')
-            
+        if prop_id:
+            for propId in prop_id:
+                # ex comparatif : is Macron taller than Trump
+                if (subject_id != None and subject2_id != None):
+                    left_retrieve = """
+                    SELECT ?val
+                    WHERE {
+                            wd:%s wdt:%s ?val
+                    }
+                    """ % (subject_id,propId)
+                    
+                    result_left_query = self._query_wdsparql(left_retrieve)
+                    
+                    #print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
+                    
+                    right_retrieve = """
+                    SELECT ?val
+                    WHERE {
+                            wd:%s wdt:%s ?val
+                    }
+                    """ % (subject2_id,propId) 
+                    
+                    result_right_query = self._query_wdsparql(right_retrieve)
+                    
+                    #print("voiici le res right retri : ",result_right_query['results']['bindings'][0]['val']['value'])
+                    print("---------------------------")
+                    print(result_left_query)
+                    print(result_right_query)
+                    
+                    if len(result_left_query['results']['bindings']) != 0 and len(result_right_query['results']['bindings']) != 0:
+                        print("je suis dans le break")
+                        
+                        break
+                    
+                # ex à un sujet : Is Frank Herbert still alive    
                 else:
-                    return WikiDataAnswer(None, None, data='no')
-            else:
-                if (prop in ['taller','higher']):
-                    return WikiDataAnswer(None, None, data='no')
-            
-                else:
-                    return WikiDataAnswer(None, None, data='yes')
-            
-            # return WikiDataAnswer(sparql_query=left_retrieve, data = not(result_left_query['boolean']))
-
-        # test predicat 'place of death'
-        if prop_id == 'P20':
-            
-            my_query = """
-                ASK { wd:%s p:%s ?prop }""" % (subject_id,prop_id)
+                    
+                    my_query = """
+                        ASK { wd:%s p:%s ?prop }""" % (subject_id,propId)
+                    
+                    result_query = self._query_wdsparql(my_query)
                 
-            result_query = self._query_wdsparql(my_query)
-        
-            return WikiDataAnswer(sparql_query=my_query, data = not(result_query['boolean']))
-        
-        if prop_id == None:
+                    return WikiDataAnswer(sparql_query=my_query, data = not(result_query['boolean']))
             
-            my_query = """
-                ASK { wd:%s ?p wd:%s}""" % (subject_id,subject2_id)
-        
-            result_query = self._query_wdsparql(my_query)
-        
-            return WikiDataAnswer(sparql_query=my_query, data = result_query['boolean'])
-        
-        if prop == 'developed':
+        # cas comparatif entre deux subjects sans prop
+        else:
             
             query = """
                 SELECT ?valLabel ?type
@@ -636,6 +629,120 @@ class WikiData(RestAdapter):
                         return WikiDataAnswer(None, None, data='yes')
 
             return WikiDataAnswer(None, None, data='no')
+                    
+        print("because of the prop : ",prop)
+        
+       
+        
+        if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
+            if (prop in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                return WikiDataAnswer(None, None, data='yes')
+                    
+            else:
+                return WikiDataAnswer(None, None, data='no')
+        else:
+            if (prop in ['taller','higher','lower','shorter','smaller','less','bigger']):
+                return WikiDataAnswer(None, None, data='no')
+                    
+            else:
+                return WikiDataAnswer(None, None, data='yes')
+        
+        
+        
+        
+
+# =============================================================================
+#         if 'P2048' in prop_id :
+#             left_retrieve = """
+#             SELECT ?val
+#             WHERE {
+#                     wd:%s wdt:%s ?val
+#             }
+#             """ % (subject_id,prop_id)
+#             
+#             result_left_query = self._query_wdsparql(left_retrieve)
+#             
+#             print("voiici le res left retri : ",result_left_query['results']['bindings'][0]['val']['value'])
+#             
+#             right_retrieve = """
+#             SELECT ?val
+#             WHERE {
+#                     wd:%s wdt:%s ?val
+#             }
+#             """ % (subject2_id,prop_id) 
+#             
+#             result_right_query = self._query_wdsparql(right_retrieve)
+#             
+#             if (result_left_query['results']['bindings'][0]['val']['value'] > result_right_query['results']['bindings'][0]['val']['value']):
+#                 if (prop in ['taller','higher']):
+#                     return WikiDataAnswer(None, None, data='yes')
+#             
+#                 else:
+#                     return WikiDataAnswer(None, None, data='no')
+#             else:
+#                 if (prop in ['taller','higher']):
+#                     return WikiDataAnswer(None, None, data='no')
+#             
+#                 else:
+#                     return WikiDataAnswer(None, None, data='yes')
+#             
+#             # return WikiDataAnswer(sparql_query=left_retrieve, data = not(result_left_query['boolean']))
+# 
+# 
+# 
+# 
+#         # test predicat 'place of death'
+#         if 'P20' in prop_id :
+#             
+#             my_query = """
+#                 ASK { wd:%s p:%s ?prop }""" % (subject_id,prop_id)
+#                 
+#             result_query = self._query_wdsparql(my_query)
+#         
+#             return WikiDataAnswer(sparql_query=my_query, data = not(result_query['boolean']))
+#         
+#         if prop_id == None:
+#             
+#             my_query = """
+#                 ASK { wd:%s ?p wd:%s}""" % (subject_id,subject2_id)
+#         
+#             result_query = self._query_wdsparql(my_query)
+#         
+#             return WikiDataAnswer(sparql_query=my_query, data = result_query['boolean'])
+#         
+#         if prop == 'developed':
+#             
+#             query = """
+#                 SELECT ?valLabel ?type
+#                 WHERE {
+#                 """
+#             sub_queries = []
+#             for pid in prop_id.split(','):
+#                 sub_query = """{
+#                     wd:%s p:%s ?prop . 
+#                     ?prop ps:%s ?val .
+#                     OPTIONAL {
+#                         ?prop psv:%s ?propVal .
+#                         ?propVal rdf:type ?type .
+#                     }
+#                 }""" % (subject_id, pid, pid, pid) 
+#                 sub_queries.append(sub_query)
+#             query += ' UNION '.join(sub_queries)
+#             query += """
+#                 SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} 
+#             }
+#             """
+# 
+#             result =  self._query_wdsparql(query)
+#             bindings = dget(result, 'results.bindings')
+#             
+#             for i in range(len(bindings)):
+#                 for key, item in bindings[i].items():
+#                     if bindings[i][key]['value'].lower() == subject2:
+#                         return WikiDataAnswer(None, None, data='yes')
+# 
+#             return WikiDataAnswer(None, None, data='no')
+# =============================================================================
         
         
         return WikiDataAnswer(sparql_query=query, bindings=bindings)
