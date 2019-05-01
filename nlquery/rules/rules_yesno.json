@@ -7,7 +7,9 @@
             "( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )" : {},
             "( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VB/VBN ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )" : {},
             "( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )" : {},
-            "( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )" : {}
+            "( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )" : {},
+            "( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( EX ) ) ( NP ( NP:subject-o ( DT ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VBN/VB ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )" : {},
+            "( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( PP ( NP ( DT ) ( NN/NNS/NNP/NNPS ) ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ) ) ) )" : {}
         }
     ]
 }
