@@ -330,7 +330,8 @@ class NLQueryEngine(LoggingInterface):
         print("subject : ",subject)
         print("prop : ",prop)
         print("subject2 : ", subject2)
-        return self.wd.yes_no_get_property(subject,subject2,prop)
+        return self.wd.getAnswer(subject,subject2,prop)
+        #return self.wd.yes_no_get_property(subject,subject2,prop)
 
     def query(self, sent, format_='plain'):
    
