@@ -30,11 +30,9 @@ def match_rules(tree, rules, fun=None, matched_rule=[], multi=False):
 
     # si c'est une yes/no question
     if 'qtype' not in context.keys():
-        print("je suis dans matcher yes/no Q")
         args = fun.__code__.co_varnames
         args = args + ('subject2',)
         action_context = {}
-        print("arrrgs : ",args)
         for arg in args:
             if arg in context:
                 action_context[arg] = context[arg]
