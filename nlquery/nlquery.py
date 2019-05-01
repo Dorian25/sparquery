@@ -360,7 +360,8 @@ class NLQueryEngine(LoggingInterface):
         rules_wh = parseJson("nlquery/rules/rules_wh.json")
         rules_yesno = parseJson("nlquery/rules/rules_yesno.json")
     
-  
+        print(" stanford tree : ",tree)
+    
         #context = {'query': sent, 'tree': tree}
         #self.info(tree)
         context1 = match_rules(tree, rules_wh["find_entity_rules"][0], self.find_entity_query, self.matched_rule1)
