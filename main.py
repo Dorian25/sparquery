@@ -1,6 +1,10 @@
 from ihm.MyApp import MyApp
 from nlquery import utils
+from nlquery.nlquery import NLQueryEngine
 #import subprocess
+
+import urllib.request
+import json
 
 if __name__ == "__main__":
     #main(sys.argv[1:])
@@ -14,3 +18,16 @@ if __name__ == "__main__":
     
     #dataset1 = utils.loadDataset("dataset/annotated_wd_data_train.txt")
     #dataset2 = utils.loadDataset("dataset/qald-7-test-en-wikidata-withoutanswers.json")
+    
+
+
+
+# =============================================================================
+#      datasetYesNo = utils.loadDataset("nlquery/rules/rules_yesno.txt")
+#      answers = []
+#      
+#      for key,item in datasetYesNo.items():
+#          answer = NLQueryEngine().query(item,'raw')
+#          answers.append(answer[0]['plain'])
+# =============================================================================
+    

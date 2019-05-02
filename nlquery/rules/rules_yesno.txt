@@ -1,7 +1,8 @@
-####################################################################################
-## Ce fichier contient les exemples sur lesquels se sont basées les règles yes/no ##
-####################################################################################
-
-1. Is Lake Baikal bigger than the Great Bear Lake ?
-2. Is Emmanuel Macron taller than Donald Trump ?
-3. 
+Is Lake Baikal bigger than the Great Bear Lake ?
+Is Emmanuel Macron taller than Donald Trump ?
+Is Michael Jackson alive ?
+Is Fortnite developed by Epic Games ?
+Is Macron taller than Trump ?
+Is there a video game called Battle Chess ?
+Are tree frogs a type of amphibian?
+Is Paris bigger than New York ?

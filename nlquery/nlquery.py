@@ -163,6 +163,7 @@ class NLQueryEngine(LoggingInterface):
         self.matched_rule1 = []
         self.matched_rule2 = []
         self.matched_rule3 = []
+        self.matched_rule4 = []
         
     def subject_query(self, qtype, subject, action, jj=None, prop=None, prop2=None, prop3=None):
         """Transforms matched context into query parameters and performs query
@@ -330,8 +331,9 @@ class NLQueryEngine(LoggingInterface):
         print("subject : ",subject)
         print("prop : ",prop)
         print("subject2 : ", subject2)
+
+        ans = self.wd.getAnswer(subject,subject2,prop)
         
-        ans = self.wd.yes_no_get_property(subject,subject2,prop)
         if not ans:
             ans = Answer()
 
@@ -342,8 +344,29 @@ class NLQueryEngine(LoggingInterface):
             'prop': prop,
         }
         
-        return self.wd.yes_no_get_property(subject,subject2,prop)
+        return ans
+    
+    def order_query(self,subject,prop=None,subject2=None):
+        
+        print("dans le yes_no_query")
+        print("subject : ",subject)
+        print("prop : ",prop)
+        print("subject2 : ", subject2)
 
+        ans = self.wd.getAnswerOrder(subject,prop,subject2)
+        
+        if not ans:
+            ans = Answer()
+
+        ans.params = {
+            'qtype': "order",
+            "subject1": subject,
+            "subject2": subject2,
+            'prop': prop,
+        }
+        
+        return ans
+        
     def query(self, sent, format_='plain'):
    
         """Answers a query
@@ -371,27 +394,37 @@ class NLQueryEngine(LoggingInterface):
         """
         rules_wh = parseJson("nlquery/rules/rules_wh.json")
         rules_yesno = parseJson("nlquery/rules/rules_yesno.json")
+        rules_order = parseJson("nlquery/rules/rules_order.json")
     
-  
+        print(" stanford tree : ",tree)
+    
         #context = {'query': sent, 'tree': tree}
         #self.info(tree)
         context1 = match_rules(tree, rules_wh["find_entity_rules"][0], self.find_entity_query, self.matched_rule1)
         context2 = match_rules(tree, rules_wh["subject_prop_rules"][0], self.subject_query, self.matched_rule2)
         contextYesNo = match_rules(tree, rules_yesno["yes_no_rules"][0], self.yes_no_query, self.matched_rule3)
+        contextOrder = match_rules(tree, rules_order["order"][0], self.order_query, self.matched_rule4)
 
         ans1 = context1
         ans2 = context2
         ansYesNo = contextYesNo
+        ansOrder = contextOrder
         
         print("ans1 : ", ans1)
         print(self.matched_rule1)
         print("ans2 : ",ans2)
         print(self.matched_rule2)
         print("ansyesno : ", ansYesNo)
+        #print(" ans order : ",ansOrder.to_dict())
         
         if format_ == 'raw':
             
-            if ans1 == None and ans2 == None and ansYesNo != None:
+            if ans1 == None and ans2 == None and ansYesNo == None and ansOrder != None:
+                ansOrder.query = sent
+                ansOrder.tree = str(tree)
+                return ansOrder.to_dict(), whichRulesMatched(self.matched_rule4)
+            
+            elif ans1 == None and ans2 == None and ansYesNo != None:
             
                 print("ans1 none ans2 none ansYesNo not_none")
                 ansYesNo.query = sent
