@@ -7,7 +7,8 @@ Created on Mon Mar 11 15:53:31 2019
 from nltk.tree import Tree
 from nltk.draw import TreeWidget
 from nltk.draw.util import CanvasFrame
-import os
+import os.path
+import csv
 
 dict_rules = {
 	'( SBARQ ( WHNP/WHADVP/WHADJP:qtype_t ) ( SQ:sq_t ) )' : {
@@ -143,12 +144,17 @@ dict_rules = {
         '( SQ ( VP:prop_match_t ) )' : '6.1.3',
         '( SQ:prop_match_t )' : '6.1.4',
 	},
-	'( SQ ( VBZ/VBD/VBP ) ( NP:subject-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ) ) )' : '7.1.1',
-    '( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( ADJP ( JJ:prop-o ) ) )' : '7.1.2',
-    '( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )' : '7.1.3',
-    '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( VP ( VBN:prop-o ) ( PP ( IN ) ( NP:subject2-o ( NNP ) ( NNPS ) ) ) ) )' : '7.1.4',
-    '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )' : '7.1.5',
-    '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )' : '7.1.6'
+    #yes/no
+    'SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( DT ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )' : '7.1.1',
+    '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ) ) )' : '7.1.2',
+    '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( ADJP ( JJ:prop-o ) ) )' : '7.1.3',
+    '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )' : '7.1.4',
+    '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VB/VBN ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )' : '7.1.5',
+    '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )' : '7.1.6',
+    '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )' : '7.1.7',
+    #order
+    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )' : '8.1.1'
+
 }
 
 
@@ -266,16 +272,21 @@ all_rules = {#qtype_t.sq_t.subj_t
      '6.1.4' : '( SBARQ ( WHNP ( WHADJP/WDT/WHNP:qtype-o ) ( NNS/NN/NP:inst-O ) ) ( SQ:prop_match_t ) )',
 
      #yes/no question
-     '7.1.1' : '( SQ ( VBZ/VBD/VBP ) ( NP:subject-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN ) ( NNP/NNS/NN ) ) ) ) )',
-     '7.1.2' : '( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( ADJP ( JJ:prop-o ) ) )',
-     '7.1.3' : '( SQ ( VBZ/VBD/VBP:action-o ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )',
-     '7.1.4' : '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( VP ( VBN:prop-o ) ( PP ( IN ) ( NP:subject2-o ( NNP ) ( NNPS ) ) ) ) )',
-     '7.1.5' : '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )',
-     '7.1.6' : '( SQ ( VBZ/VBD/VBP ) ( NP ( NNP:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NNP:subject2-o ) ) ) ) )'
+     '7.1.1' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( DT ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )',
+     '7.1.2' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ) ) )',
+     '7.1.3' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( ADJP ( JJ:prop-o ) ) )',
+     '7.1.4' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )',
+     '7.1.5' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VB/VBN ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )',
+     '7.1.6' : '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )',
+     '7.1.7' : '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )',
+     
+     #order
+     '8.1.1' : '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )',
+
 }
         
 
-def whichRulesMatched(matches) :
+def whichRulesMatched(matches, params, query) :
     
     idRules = ""
     dictCourant = dict_rules
@@ -299,11 +310,61 @@ def whichRulesMatched(matches) :
             
             
     if idRules :
+        writeSuggestions(idRules, params, query)
         return all_rules[idRules] 
     return idRules
 
-
+def writeSuggestions(idRules, params, query):
+    
+    filepath = "ihm/history/skeleton_query.csv"
+    skeleton = ""
+    query_lower = query.lower()
+    row = []
+    
+    print("param",params)
+    if params["qtype"] == "yesno" :
+        skeleton = query_lower.replace(params["subject1"],"(S1)")
+        skeleton = skeleton.replace(params["subject2"],"(S2)")
+        skeleton = skeleton.replace(params["prop"],"(P)")
+    else :
+        
+        if "subject" in params :
+            skeleton = query_lower.replace(params["subject"],"(S)")
             
+        elif "inst" in params :
+            skeleton = query_lower.replace(params["inst"],"(S)")
+            
+        if params["prop"] :
+            skeleton = skeleton.replace(params["prop"],"(P)")
+            
+        
+        print("skeleton",skeleton)
+        
+    row = [idRules,params["qtype"],skeleton]
+        
+        
+    if os.path.isfile(filepath) :
+        #append mode = permet d'ajouter à un fichier existant
+        with open(filepath, 'a', newline='') as csvFile:
+            writer = csv.writer(csvFile)
+                
+            writer.writerow(row)
+                
+        csvFile.close()
+        
+    else :
+        with open(filepath, 'w', newline='') as csvFile:
+            writer = csv.writer(csvFile)
+                
+            writer.writerow(row)
+                
+        csvFile.close()
+        
+    
+    
+
+
+"""            
 def createImageOfRules(rules) :
     
     for k,v in rules.items() :
@@ -333,4 +394,5 @@ def createImageOfRules(rules) :
         os.system("convert %s %s" % (filenamePS, filenamePNG))
         
 if __name__ == "__main__":
-    createImageOfRules(all_rules)     
+    createImageOfRules(all_rules)  
+"""

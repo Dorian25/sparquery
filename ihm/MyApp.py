@@ -14,6 +14,7 @@ from .AnswerFrame import AnswerFrame
 from .AskMeQuestionFrame import AskMeQuestionFrame
 from .DidYouMeanFrame import DidYouMeanFrame
 from .HistoryFrame import HistoryFrame
+from .ReformulationFrame import ReformulationFrame
 
 class MyApp(Tk) :
     
@@ -69,6 +70,7 @@ class MyApp(Tk) :
         self.sparqlFrame = SparqlQueryFrame(self.tabs)
         self.didYouMeanFrame = DidYouMeanFrame(self.tabs)
         self.historyFrame = HistoryFrame(self.tabs)
+        self.reformulationFrame = ReformulationFrame(self.tabs)
 
         self.askMeQuestionFrame.treeQuery = self.treeQueryFrame
         self.askMeQuestionFrame.treeRule = self.treeRulesFrame
@@ -76,6 +78,7 @@ class MyApp(Tk) :
         self.askMeQuestionFrame.answer = self.answerFrame  
         self.askMeQuestionFrame.suggestion = self.didYouMeanFrame
         self.askMeQuestionFrame.history = self.historyFrame
+        self.askMeQuestionFrame.reformulation = self.reformulationFrame
         
         ##############################################
         #Parametrage du notebook pour ajouter tous les onglets et les fenetres
@@ -85,6 +88,7 @@ class MyApp(Tk) :
         self.tabs.add(self.left, text="POS Tags Tree".upper())
         self.tabs.add(self.didYouMeanFrame, text="Did you mean".upper())
         self.tabs.add(self.historyFrame, text="History".upper())
+        self.tabs.add(self.reformulationFrame, text="Reformulation".upper())
         #ajouter onglet Existed property (listant toutes les proprietes d'un subject)
         self.tabs.pack(expand=1, fill=BOTH) 
         

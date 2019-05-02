@@ -330,6 +330,18 @@ class NLQueryEngine(LoggingInterface):
         print("subject : ",subject)
         print("prop : ",prop)
         print("subject2 : ", subject2)
+        
+        ans = self.wd.yes_no_get_property(subject,subject2,prop)
+        if not ans:
+            ans = Answer()
+
+        ans.params = {
+            'qtype': "yesno",
+            "subject1": subject,
+            "subject2": subject2,
+            'prop': prop,
+        }
+        
         return self.wd.yes_no_get_property(subject,subject2,prop)
 
     def query(self, sent, format_='plain'):
@@ -384,7 +396,7 @@ class NLQueryEngine(LoggingInterface):
                 print("ans1 none ans2 none ansYesNo not_none")
                 ansYesNo.query = sent
                 ansYesNo.tree = str(tree)
-                return ansYesNo.to_dict(), whichRulesMatched(self.matched_rule3)
+                return ansYesNo.to_dict(), whichRulesMatched(self.matched_rule3, ansYesNo.params, sent)
             
             elif ans2 == None and ans1 == None :
                 
@@ -399,14 +411,14 @@ class NLQueryEngine(LoggingInterface):
                 print("ans1 none ans2 not_none")
                 ans2.query = sent
                 ans2.tree = str(tree)
-                return ans2.to_dict(), whichRulesMatched(self.matched_rule2)
+                return ans2.to_dict(), whichRulesMatched(self.matched_rule2, ans2.params, sent)
             
             elif ans2 == None and ans1 != None :
                 
                 print("ans1 not_none ans2 none")
                 ans1.query = sent
                 ans1.tree = str(tree)
-                return ans1.to_dict(), whichRulesMatched(self.matched_rule1)
+                return ans1.to_dict(), whichRulesMatched(self.matched_rule1, ans1.params, sent)
             
             
             else :

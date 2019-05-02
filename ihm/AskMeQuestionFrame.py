@@ -57,6 +57,7 @@ class AskMeQuestionFrame(Frame):
         self.dictAns = None
         self.suggestion = None
         self.history = None
+        self.reformulation = None
         
         ##############################################
         #Permet de savoir si l'utilisateur a appuyé sur ENTER
@@ -111,3 +112,5 @@ class AskMeQuestionFrame(Frame):
                 self.suggestion.setSuggestion(self.dictAns['suggestions']['subject'], self.dictAns['suggestions']['prop'])
             else :
                 self.suggestion.setSuggestion([],[])
+                
+            self.reformulation.setMaterialsReformulation(self.dictAns['params'])

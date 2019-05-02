@@ -58,14 +58,14 @@ class HistoryFrame(Label):
         
         if os.path.isfile(self.filepath) :
             #append mode = permet d'ajouter à un fichier existant
-            with open(self.filepath, 'a') as csvFile:
+            with open(self.filepath, 'a', newline='') as csvFile:
                 writer = csv.writer(csvFile)
                 
                 writer.writerow(row)
                 
             csvFile.close()
         else :
-            with open(self.filepath, 'w') as csvFile:
+            with open(self.filepath, 'w', newline='') as csvFile:
                 writer = csv.writer(csvFile)
                 
                 writer.writerow(row)

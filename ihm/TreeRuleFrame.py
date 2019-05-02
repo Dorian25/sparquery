@@ -64,10 +64,10 @@ class TreeRuleFrame(LabelFrame):
             self.labelTreeRule.image = self.photo # keep a reference
             
         else :
+            
             self.convertPsToPng(treeVal)
             
             self.image = Image.open(self.filenamePNG)
             self.photo = ImageTk.PhotoImage(self.image)
             self.labelTreeRule.configure(image=self.photo)
             self.labelTreeRule.image = self.photo # keep a reference
-      
