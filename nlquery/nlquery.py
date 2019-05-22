@@ -8,6 +8,7 @@ from .utils import parseJson
 from .api_adapter import LoggingInterface
 from .answer import Answer
 from .rules.utils_rules import whichRulesMatched
+from nltk.stem.porter import *
 
 #from threading import local
 
@@ -347,26 +348,27 @@ class NLQueryEngine(LoggingInterface):
         return ans
     
     def order_query(self,subject,prop=None,subject2=None):
-        
-        print("dans le yes_no_query")
-        print("subject : ",subject)
-        print("prop : ",prop)
-        print("subject2 : ", subject2)
+         
+         print("dans le yes_no_query")
+         print("subject : ",subject)
+         print("prop : ",prop)
+         print("subject2 : ", subject2)
+         
+         ans = self.wd.getAnswerOrder(subject,prop,subject2)
+         
+         if not ans:
+             ans = Answer()
+         
+         ans.params = {
+             'qtype': "order",
+             "subject1": subject,
+             "subject2": subject2,
+             'prop': prop,
+         }
+         
+         return ans
 
-        ans = self.wd.getAnswerOrder(subject,prop,subject2)
-        
-        if not ans:
-            ans = Answer()
-
-        ans.params = {
-            'qtype': "order",
-            "subject1": subject,
-            "subject2": subject2,
-            'prop': prop,
-        }
-        
-        return ans
-        
+    
     def query(self, sent, format_='plain'):
    
         """Answers a query

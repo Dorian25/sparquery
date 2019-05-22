@@ -936,7 +936,8 @@ class WikiData(RestAdapter):
         answer.feedback["type_question"] = "This is a question of the type : order (imperative form)"
         
         # retrieving ids of subject1
-        subj1Ids = self.getIds(subject1,"item")
+        if subject1 != None:
+            subj1Ids = self.getIds(subject1,"item")
         if subject2 != None:
             # retrieving ids of subject2
             subj2Ids = self.getIds(subject2,"item")
@@ -970,9 +971,41 @@ class WikiData(RestAdapter):
                     
                     result = self._query_wdsparql(query)
                     bindings = dget(result, 'results.bindings')
-                    #print("vindinds : ",bindings)
-                    #print("resultssss : ",result)
+
+                    if len(result['results']['bindings']) != 0:
+                        return WikiDataAnswer(sparql_query=query,bindings=bindings)
+
+        elif subj1Ids != None and subj2Ids == None and propIds == None:
+            for idS in subj1Ids:
+                query = """
+                        Select ?val ?valLabel 
+                        Where  {
+                            ?val ?p wd:%s.
+                            SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
+                        }
+                        
+                    """ % (idS)
+                result = self._query_wdsparql(query)
+                bindings = dget(result, 'results.bindings')
+                print('ressss : ',result)
+                print('bindings : ',bindings)
+                if len(result['results']['bindings']) != 0:
+                    return WikiDataAnswer(sparql_query=query,bindings=bindings)
+                
+        elif subj1Ids == None and subj2Ids != None and propIds != None:
+            for idS in subj2Ids:
+                for idP in propIds:
+                    query = """
+                        Select ?val ?valLabel
+                        Where  {
+                            ?val wdt:%s wd:%s
+                            SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
+                        }
+                        LIMIT 7
+                    """ % (idP,idS)
+                    result = self._query_wdsparql(query)
+                    bindings = dget(result, 'results.bindings')
                     
                     if len(result['results']['bindings']) != 0:
-                        #print("ZzzZZZZ")
+
                         return WikiDataAnswer(sparql_query=query,bindings=bindings)
