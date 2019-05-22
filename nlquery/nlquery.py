@@ -8,6 +8,7 @@ from .utils import parseJson
 from .api_adapter import LoggingInterface
 from .answer import Answer
 from .rules.utils_rules import whichRulesMatched
+from nltk.stem.porter import *
 
 #from threading import local
 
@@ -367,6 +368,9 @@ class NLQueryEngine(LoggingInterface):
         
         return ans
         
+    def order_query(self,subject=None,prop=None,subject2=None):
+        return self.wd.getAnswerOrder(subject,prop,subject2)
+    
     def query(self, sent, format_='plain'):
    
         """Answers a query
