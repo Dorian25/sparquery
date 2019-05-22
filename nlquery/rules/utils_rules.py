@@ -281,7 +281,7 @@ all_rules = {#qtype_t.sq_t.subj_t
      '7.1.3' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ) ) ) )',
      '7.1.4' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ) ) )',
      '7.1.5' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( DT ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )',
-     '7.1.6' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ) ) )'',
+     '7.1.6' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP:subject2-o ( NNP/NNS/NN/NNPS ) ( NNP/NNS/NN/NNPS ) ) ) ) )',
      '7.1.7' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NNP ) ( NNP ) ) ( NP ( DT ) ( NN:subject2-o ) ) )',
      '7.1.8' : '( SQ ( VBZ/VBD/VBP/VB/VBN ) ( NP:subject-o ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VB/VBN ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )',
      '7.1.9' : '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( NP ( NP ( JJR:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )',
@@ -318,6 +318,7 @@ def whichRulesMatched(matches, params, query) :
             
             
     if idRules :
+        print("write suggestion")
         writeSuggestions(idRules, params, query)
         return all_rules[idRules] 
     return idRules
@@ -331,10 +332,13 @@ def writeSuggestions(idRules, params, query):
     
     print("param",params)
     if params["qtype"] == "yesno" :
-        skeleton = query_lower.replace(params["subject1"],"(S1)")
-        skeleton = skeleton.replace(params["subject2"],"(S2)")
-        skeleton = skeleton.replace(params["prop"],"(P)")
-    elif params["qtype"] == "order" :
+        if params["subject1"] :
+            skeleton = query_lower.replace(params["subject1"],"(S1)")
+        if params["subject2"] :
+            skeleton = skeleton.replace(params["subject2"],"(S2)")
+        if params["prop"] :
+            skeleton = skeleton.replace(params["prop"],"(P)")
+
     else :
         
         if "subject" in params :
@@ -343,11 +347,12 @@ def writeSuggestions(idRules, params, query):
         elif "inst" in params :
             skeleton = query_lower.replace(params["inst"],"(S)")
             
-        if params["prop"] :
-            skeleton = skeleton.replace(params["prop"],"(P)")
+        if "prop" in params :
+            if params["prop"] :
+                skeleton = skeleton.replace(params["prop"],"(P)")
             
         
-        print("skeleton",skeleton)
+        #print("skeleton",skeleton)
         
     row = [idRules,params["qtype"],skeleton]
         
@@ -368,6 +373,32 @@ def writeSuggestions(idRules, params, query):
             writer.writerow(row)
                 
         csvFile.close()
+        
+def readSuggestions():
+    
+    filepath = "ihm/history/skeleton_query.csv"
+    skeletons = []
+    #on charge le fichier lorsque l'appli s'ouvre
+        
+    #si le fichier de log existe alors on le lit et rempli le tableau
+    if os.path.isfile(filepath) :
+        #print("exist")
+        #avant d'afficher on supprime
+        #delimiter "," par defaut
+        with open(filepath, 'r') as csvFile:
+            reader = csv.reader(csvFile)
+                
+            for row in reader:
+                if len(row) != 0 :
+                    #print("row",row)
+                    skeletons.append(row[2])
+
+        csvFile.close()
+    
+    
+    return set(skeletons)
+    
+
         
     
     

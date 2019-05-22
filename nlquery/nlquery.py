@@ -410,11 +410,11 @@ class NLQueryEngine(LoggingInterface):
         ansYesNo = contextYesNo
         ansOrder = contextOrder
         
-        print("ans1 : ", ans1)
-        print(self.matched_rule1)
-        print("ans2 : ",ans2)
-        print(self.matched_rule2)
-        print("ansyesno : ", ansYesNo)
+        #print("ans1 : ", ans1)
+        #print(self.matched_rule1)
+        #print("ans2 : ",ans2)
+        #print(self.matched_rule2)
+        #print("ansyesno : ", ansYesNo)
         #print(" ans order : ",ansOrder.to_dict())
         
         if format_ == 'raw':
@@ -422,7 +422,7 @@ class NLQueryEngine(LoggingInterface):
             if ans1 == None and ans2 == None and ansYesNo == None and ansOrder != None:
                 ansOrder.query = sent
                 ansOrder.tree = str(tree)
-                return ansOrder.to_dict(), whichRulesMatched(self.matched_rule4)
+                return ansOrder.to_dict(), whichRulesMatched(self.matched_rule4, ansOrder.params, sent)
             
             elif ans1 == None and ans2 == None and ansYesNo != None:
             
@@ -456,22 +456,23 @@ class NLQueryEngine(LoggingInterface):
             
             else :
                 print("2 ANSWERS")
+                print("ans1",ans1.to_dict())
+                print("ans2",ans2.to_dict())
                 
                 if ans1.to_dict()['plain'] == "None" :
                     
                     ans2.query = sent
                     ans2.tree = str(tree)
-                    return ans2.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                    return ans2.to_dict(), whichRulesMatched(self.matched_rule2, ans2.params, sent)
                 
                 elif ans2.to_dict()['plain'] == "None" :
                     
                     ans1.query = sent
                     ans1.tree = str(tree)
-                    return ans1.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'
+                    return ans1.to_dict(), whichRulesMatched(self.matched_rule1, ans1.params, sent)
                 #2 reponses possibles
                 else :
-                    print(ans2.to_dict())
-                    print(ans1.to_dict())
+        
                     ans2.query = sent
                     ans2.tree = str(tree)
                     return ans2.to_dict(),'( SBARQ ( WHNP ( WDT:qtype-o=what ) ( NN:prop3-o ) ) ( SQ ( VP ( ADVP:prop-o ) ) ( VBZ ) ( VP:suject-o ) ) )'

@@ -17,6 +17,18 @@ class AskMeQuestionFrame(Frame):
         #Style
         s_Frame = Style()
         s_Frame.configure("AskFrame.TFrame",background="#22303D")
+                          
+        s_Label= Style()
+        s_Label.configure('AskLabel.TLabel', font=("Arial", 13, 'bold'),
+                                             foreground="white",
+                                             background="#22303D", 
+                                             anchor = CENTER)
+        
+        s_radio = Style()
+        s_radio.configure('Radiob.TRadiobutton',
+                                             foreground="white",
+                                             background="#22303D", 
+                                             padding=5)
         
         ##############################################
         
@@ -37,12 +49,12 @@ class AskMeQuestionFrame(Frame):
         ##############################################
         self.answerCorrect = StringVar()
         
-        self.blocCorrect = Frame(self)
-        self.blocCorrect.pack(fill=X, side=BOTTOM)
+        self.blocCorrect = Frame(self, style="AskFrame.TFrame")
+        self.blocCorrect.pack(fill=X, side=BOTTOM, padx=50, ipady=8)
         
-        label = Label(self.blocCorrect,text="Is correct answer ?")
-        r1 = Radiobutton(self.blocCorrect, text="Yes", variable=self.answerCorrect, value="yes", command=self.feedbackAnswer)
-        r2 = Radiobutton(self.blocCorrect, text="No", variable=self.answerCorrect, value="no", command=self.feedbackAnswer)
+        label = Label(self.blocCorrect,text="Is the answer correct ?", style="AskLabel.TLabel")
+        r1 = Radiobutton(self.blocCorrect, text="Yes", variable=self.answerCorrect, value="yes", command=self.feedbackAnswer,style='Radiob.TRadiobutton')
+        r2 = Radiobutton(self.blocCorrect, text="No", variable=self.answerCorrect, value="no", command=self.feedbackAnswer,style='Radiob.TRadiobutton')
         
         label.pack(side=LEFT)
         r1.pack(side=LEFT)
@@ -109,8 +121,9 @@ class AskMeQuestionFrame(Frame):
             else :
                 self.sparqlQuery.setQuery(None, None)
             if 'suggestions' in self.dictAns:    
-                self.suggestion.setSuggestion(self.dictAns['suggestions']['subject'], self.dictAns['suggestions']['prop'])
+                self.suggestion.setSuggestion(self.dictAns['suggestions'])
+                self.reformulation.setMaterialsReformulation(self.dictAns['suggestions'])
+
             else :
-                self.suggestion.setSuggestion([],[])
-                
-            self.reformulation.setMaterialsReformulation(self.dictAns['params'])
+                self.suggestion.setSuggestion({"subject":[],"prop":[],"subject1":[],"subject2":[]})
+                self.reformulation.setMaterialsReformulation({"subject":[],"prop":[],"subject1":[],"subject2":[]})

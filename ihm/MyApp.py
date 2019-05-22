@@ -91,8 +91,3 @@ class MyApp(Tk) :
         self.tabs.add(self.reformulationFrame, text="Reformulation".upper())
         #ajouter onglet Existed property (listant toutes les proprietes d'un subject)
         self.tabs.pack(expand=1, fill=BOTH) 
-        
-        ##############################################
-        #barre de status
-        #self.statusBar = Label(self,text="Welcome ", anchor=W, relief=SUNKEN, borderwidth=1)
-        #self.statusBar.pack(fill=X, side=BOTTOM) 

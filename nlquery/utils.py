@@ -59,17 +59,16 @@ def dget(d, dkey, default=None):
 
 def getSuggestions(search) :
     """
-    
-    
-    Returns:
-        All suggestions containing the couple (label,description) for each item in the array
+    cela retourne tous les resultats d'une recherche sous la forme d'un tableau
+    contenant pour chaque resultat = (id,label,description)
     """
     suggestions = []
     
     for result in search :
+        id_res = dget(result,"id")
         label = dget(result, "label")
         desc = dget(result, "description")
-        suggestions.append((label,desc))
+        suggestions.append((id_res,label,desc))
         
     return suggestions
 

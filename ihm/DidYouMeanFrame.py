@@ -33,7 +33,7 @@ class DidYouMeanFrame(Label):
         self.blocSuggSubj = Frame(self, style="SuggSubjBloc.TFrame")
         self.blocSuggSubj.pack(fill=X, padx=50, pady=20)
         
-        self.dataColsSubj = ('suggestion subject', 'description')        
+        self.dataColsSubj = ('id subject', 'suggestion subject', 'description')        
         self.tableauSubj = Treeview(self.blocSuggSubj, columns=self.dataColsSubj, show = 'headings', style="tableau.Treeview", selectmode = "none")
         for c in self.dataColsSubj:
             self.tableauSubj.heading(c, text=c.title(), anchor=CENTER)            
@@ -42,6 +42,7 @@ class DidYouMeanFrame(Label):
         
         self.vscrollbarSubj = Scrollbar(self.blocSuggSubj, command=self.tableauSubj.yview, orient="vertical")
         self.vscrollbarSubj.pack(side=LEFT,fill=Y)
+        
         self.tableauSubj.configure(yscrollcommand=self.vscrollbarSubj.set)
     
 
@@ -50,7 +51,7 @@ class DidYouMeanFrame(Label):
         self.blocSuggProp = Frame(self, style="SuggPropBloc.TFrame")
         self.blocSuggProp.pack(fill=X, padx=50, pady=20)
         
-        self.dataColsProp = ('suggestion property', 'description')        
+        self.dataColsProp = ('id property','suggestion property', 'description')        
         self.tableauProp = Treeview(self.blocSuggProp, columns=self.dataColsProp, show = 'headings', style="tableau.Treeview", selectmode = "none")
         for c in self.dataColsProp:
             self.tableauProp.heading(c, text=c.title(), anchor=CENTER)            
@@ -59,9 +60,10 @@ class DidYouMeanFrame(Label):
         
         self.vscrollbarProp = Scrollbar(self.blocSuggProp, command=self.tableauProp.yview, orient="vertical")
         self.vscrollbarProp.pack(side=LEFT,fill=Y)
+        
         self.tableauProp.configure(yscrollcommand=self.vscrollbarProp.set)
         
-    def setSuggestion(self, suggSubj, suggProp):
+    def setSuggestion(self, sugg):
         
         #on vide les tableaux
         for child in self.tableauSubj.get_children():
@@ -70,11 +72,19 @@ class DidYouMeanFrame(Label):
             self.tableauProp.delete(child)
             
         #on les rempli
-        if suggSubj :
-            for s in suggSubj:
+        if sugg["subject"] :
+            for s in sugg["subject"]:
                 #insert(parent, ajoute apres)
-                self.tableauSubj.insert("", 'end', values = (s[0],s[1]))
-        if suggProp :
-            for s in suggProp:
+                self.tableauSubj.insert("", 'end', values = (s[0],s[1],s[2]))
+        if sugg["subject1"] :
+            for s in sugg["subject1"]:
                 #insert(parent, ajoute apres)
-                self.tableauProp.insert("", 'end', values = (s[0],s[1]))                
+                self.tableauSubj.insert("", 'end', values = (s[0],s[1],s[2]))
+        if sugg["subject2"] :
+            for s in sugg["subject2"]:
+                #insert(parent, ajoute apres)
+                self.tableauSubj.insert("", 'end', values = (s[0],s[1],s[2]))
+        if sugg["prop"] :
+            for s in sugg["prop"]:
+                #insert(parent, ajoute apres)
+                self.tableauProp.insert("", 'end', values = (s[0],s[1],s[2]))                

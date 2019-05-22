@@ -61,7 +61,7 @@ class RestAdapter(LoggingInterface):
         except ConnectionError:
             print('ConnectionError')
             return None
-        self.info(response.url, _format=False)
+        #self.info(response.url, _format=False)
 
         if format_ == 'json':
             try:
