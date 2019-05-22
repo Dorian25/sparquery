@@ -347,26 +347,28 @@ class NLQueryEngine(LoggingInterface):
         
         return ans
     
-    def order_query(self,subject,prop=None,subject2=None):
-        
-        print("dans le yes_no_query")
-        print("subject : ",subject)
-        print("prop : ",prop)
-        print("subject2 : ", subject2)
-
-        ans = self.wd.getAnswerOrder(subject,prop,subject2)
-        
-        if not ans:
-            ans = Answer()
-
-        ans.params = {
-            'qtype': "order",
-            "subject1": subject,
-            "subject2": subject2,
-            'prop': prop,
-        }
-        
-        return ans
+# =============================================================================
+#     def order_query(self,subject,prop=None,subject2=None):
+#         
+#         print("dans le yes_no_query")
+#         print("subject : ",subject)
+#         print("prop : ",prop)
+#         print("subject2 : ", subject2)
+# 
+#         ans = self.wd.getAnswerOrder(subject,prop,subject2)
+#         
+#         if not ans:
+#             ans = Answer()
+# 
+#         ans.params = {
+#             'qtype': "order",
+#             "subject1": subject,
+#             "subject2": subject2,
+#             'prop': prop,
+#         }
+#         
+#         return ans
+# =============================================================================
         
     def order_query(self,subject=None,prop=None,subject2=None):
         return self.wd.getAnswerOrder(subject,prop,subject2)
