@@ -967,6 +967,7 @@ class WikiData(RestAdapter):
                             wd:%s wdt:%s ?val
                             SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
                         }
+                        LIMIT 7
                     """ % (idS,idP)
                     
                     result = self._query_wdsparql(query)
@@ -981,9 +982,10 @@ class WikiData(RestAdapter):
                         Select ?val ?valLabel 
                         Where  {
                             ?val ?p wd:%s.
+                            ?val rdfs:label ?valLabel.
                             SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
                         }
-                        
+                        LIMIT 7
                     """ % (idS)
                 result = self._query_wdsparql(query)
                 bindings = dget(result, 'results.bindings')

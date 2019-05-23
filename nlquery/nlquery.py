@@ -347,7 +347,7 @@ class NLQueryEngine(LoggingInterface):
         
         return ans
     
-    def order_query(self,subject,prop=None,subject2=None):
+    def order_query(self,subject=None,prop=None,subject2=None):
          
          print("dans le yes_no_query")
          print("subject : ",subject)

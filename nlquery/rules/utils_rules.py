@@ -157,7 +157,10 @@ dict_rules = {
     '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ( ADJP ( JJR:prop-o ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject2-o ) ) ) ) )' : '7.1.10',
     '( SQ ( VBZ/VBD/VBP/VBN/VB ) ( NP ( EX ) ) ( NP ( NP:subject-o ( DT ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ( VP ( VBZ/VBD/VBP/VBN/VB ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) )' : '7.1.11',
     #order
-    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )' : '8.1.1'
+    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )' : '8.1.1',
+    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( PDT ) ( DT ) ( NN/NNS/NNP/NNPS:subject-o ) ) ) )' : '8.1.2',
+    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP:subject-o ( DT ) ( JJ ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) )' : '8.1.3',
+    '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( NP ( NN/NNS/NNP/NNPS ) ) ( VP ( VB/VBZ/VBN/VBP/VBG:prop-o ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) ) ) )' : '8.1.4'
 
 }
 
@@ -290,6 +293,9 @@ all_rules = {#qtype_t.sq_t.subj_t
      
      #order
      '8.1.1' : '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( NP ( DT ) ( NN/NNS/NNP/NNPS:prop-o ) ) ( PP ( IN ) ( NP ( NN/NNS/NNP/NNPS:subject-o ) ) ) ) ) )',
+     '8.1.2' : '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( PRP ) ) ( NP ( PDT ) ( DT ) ( NN/NNS/NNP/NNPS:subject-o ) ) ) )',
+     '8.1.3' : '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP:subject-o ( DT ) ( JJ ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) )',
+     '8.1.4' : '( SQ ( VP ( VB/VBZ/VBN/VBP/VBG ) ( NP ( NP ( NN/NNS/NNP/NNPS ) ) ( VP ( VB/VBZ/VBN/VBP/VBG:prop-o ) ( PP ( IN ) ( NP:subject2-o ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ( NN/NNS/NNP/NNPS ) ) ) ) ) ) )'
 
 }
         
@@ -331,7 +337,7 @@ def writeSuggestions(idRules, params, query):
     row = []
     
     print("param",params)
-    if params["qtype"] == "yesno" :
+    if params["qtype"] == "yesno" or params["qtype"] == "order" :
         if params["subject1"] :
             skeleton = query_lower.replace(params["subject1"],"(S1)")
         if params["subject2"] :
