@@ -68,8 +68,3 @@ class TreeQueryFrame(LabelFrame):
             self.photo = ImageTk.PhotoImage(self.image)
             self.labelTreeQuery.configure(image=self.photo)
             self.labelTreeQuery.image = self.photo # keep a reference
-      
-        
-
-        
-        

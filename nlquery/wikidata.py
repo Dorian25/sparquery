@@ -740,7 +740,7 @@ class WikiData(RestAdapter):
                 
                 
         if not subj1Ids :
-            answer.feedback["subject1"] = "I did not find the 1st subject 1 : "+ subject1.upper()
+            answer.feedback["subject1"] = "I did not find the 1st subject : "+ subject1.upper()
             answer.suggestions["subject1"] = suggestions_s1
             subj1_id_found = False
         else :
@@ -931,22 +931,79 @@ class WikiData(RestAdapter):
         subj1Ids = None
         subj2Ids = None
         propIds = None
+
         
         answer = WikiDataAnswer(sparql_query=None)
-        answer.feedback["type_question"] = "This is a question of the type : order (imperative form)"
         
-        # retrieving ids of subject1
+        subj1_id_found = False
+        subj2_id_found = False
+        subj1_given = False
+        subj2_given = False
+        
+        prop_id_found = False
+        prop_given = False
+        prop_known = True
+        
+        
         if subject1 != None:
-            subj1Ids = self.getIds(subject1,"item")
+            #subj1Ids : seulement les ids qui matchent a 100% avec le subj1
+            subj1_given = True
+            subj1Ids, suggestions_s1 = self._get_id(subject1, "item")
+
         if subject2 != None:
             # retrieving ids of subject2
-            subj2Ids = self.getIds(subject2,"item")
+            #subj2Ids = self.getIds(subject2,"item")
+            subj2_given = True
+            subj2Ids, suggestions_s2 = self._get_id(subject2, "item")
+            
         if prop != None:
+            prop_given = True
             propIds = self.getKnownProp(prop)
             # if the prop is unknown 
             if len(propIds) == 0:
+                prop_known = False
                 # retrieving ids of prop
-                propIds = self.getIds(prop,"property")
+                #propIds = self.getIds(prop,"property")
+                propIds, suggestions_prop = self._get_id(prop, "property")
+                
+        if subj1_given :        
+            if not subj1Ids :
+                answer.feedback["subject1"] = "I did not find the 1st subject : "+ subject1.upper()
+                answer.suggestions["subject1"] = suggestions_s1
+                subj1_id_found = False
+            else :
+                answer.feedback["match_subj1"] = "I found "+str(len(subj1Ids))+" result(s) related to the 1st subject : "+ subject1.upper()
+                answer.suggestions["subject1"] = suggestions_s1
+                subj1_id_found = True
+        
+        if subj2_given :
+            if not subj2Ids :
+                answer.feedback["subject2"] = "I did not find the 2nd subject : "+ subject2.upper()
+                answer.suggestions["subject2"] = suggestions_s2
+                subj2_id_found = False
+            else :
+                answer.feedback["match_subj2"] = "I found "+str(len(subj2Ids))+" result(s) related to the 2nd subject : "+ subject2.upper()
+                answer.suggestions["subject2"] = suggestions_s2
+                subj2_id_found = True
+        #else :
+        #    answer.feedback["subject2"] = "There is not subject 2 "
+
+            
+        
+        if prop_given :    
+            if not propIds :
+                answer.feedback["property"] = "I did not find the property : " + prop.upper()
+                answer.suggestions["prop"] = suggestions_prop
+                prop_id_found = False
+            else :
+                answer.feedback["property"] = "I found "+str(len(propIds))+" result(s) related to the property : " + prop.upper()
+                if not prop_known :
+                    answer.suggestions["prop"] = suggestions_prop
+                prop_id_found = True
+                
+        else :
+            answer.feedback["property"] = "There is not property defined"
+        
                 
         """
             Requête SPARQL + réponse retournée
@@ -958,7 +1015,7 @@ class WikiData(RestAdapter):
         
         # cas subject - prop
         # ex : give me the capital of France
-        if subj1Ids != None and subj2Ids == None and propIds != None:
+        if subj1_id_found and subj2Ids == None and prop_id_found :
             for idS in subj1Ids:
                 for idP in propIds:
                     query = """
@@ -974,13 +1031,19 @@ class WikiData(RestAdapter):
                     bindings = dget(result, 'results.bindings')
 
                     if len(result['results']['bindings']) != 0:
-                        return WikiDataAnswer(sparql_query=query,bindings=bindings)
+                        answer.bindings = bindings
+                        answer.data = WikiDataAnswer.get_data(bindings)
+                        answer.sparql_desc[idS] = subject1
+                        answer.sparql_desc[idP] = prop
+                        answer.sparql_query = query
+                        
+                        return answer
 
-        elif subj1Ids != None and subj2Ids == None and propIds == None:
+        elif subj1_id_found and subj2Ids == None and propIds == None:
             for idS in subj1Ids:
                 query = """
-                        Select ?val ?valLabel 
-                        Where  {
+                        SELECT ?val ?valLabel 
+                        WHERE  {
                             ?val ?p wd:%s.
                             ?val rdfs:label ?valLabel.
                             SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
@@ -992,14 +1055,19 @@ class WikiData(RestAdapter):
                 print('ressss : ',result)
                 print('bindings : ',bindings)
                 if len(result['results']['bindings']) != 0:
-                    return WikiDataAnswer(sparql_query=query,bindings=bindings)
+                    answer.bindings = bindings
+                    answer.data = WikiDataAnswer.get_data(bindings)
+                    answer.sparql_desc[idS] = subject1
+                    answer.sparql_query = query
+                        
+                    return answer
                 
-        elif subj1Ids == None and subj2Ids != None and propIds != None:
+        elif subj1Ids == None and subj2_id_found and prop_id_found:
             for idS in subj2Ids:
                 for idP in propIds:
                     query = """
-                        Select ?val ?valLabel
-                        Where  {
+                        SELECT ?val ?valLabel
+                        WHERE  {
                             ?val wdt:%s wd:%s
                             SERVICE wikibase:label { bd:serviceParam wikibase:language "en"}
                         }
@@ -1009,5 +1077,10 @@ class WikiData(RestAdapter):
                     bindings = dget(result, 'results.bindings')
                     
                     if len(result['results']['bindings']) != 0:
-
-                        return WikiDataAnswer(sparql_query=query,bindings=bindings)
+                        answer.bindings = bindings
+                        answer.data = WikiDataAnswer.get_data(bindings)
+                        answer.sparql_desc[idS] = subject2
+                        answer.sparql_desc[idP] = prop
+                        answer.sparql_query = query
+        else :
+            return answer

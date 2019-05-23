@@ -21,8 +21,8 @@ class MyApp(Tk) :
     def __init__(self):
         super().__init__()
 
-        self.title("Interrogation SPARQL/RDF en Langage Naturel")
-        self.iconbitmap("ihm/software_image/cropped-bot-logo.ico")
+        self.title("SPARQuery - Interrogation SPARQL/RDF en Langage Naturel")
+        self.iconbitmap("ihm/software_image/logo_sparquery_squared.ico")
         self.minsize(1200,750)
         
         ##############################################

@@ -356,9 +356,7 @@ def writeSuggestions(idRules, params, query):
         if "prop" in params :
             if params["prop"] :
                 skeleton = skeleton.replace(params["prop"],"(P)")
-            
-        
-        #print("skeleton",skeleton)
+
         
     row = [idRules,params["qtype"],skeleton]
         
@@ -388,7 +386,6 @@ def readSuggestions():
         
     #si le fichier de log existe alors on le lit et rempli le tableau
     if os.path.isfile(filepath) :
-        #print("exist")
         #avant d'afficher on supprime
         #delimiter "," par defaut
         with open(filepath, 'r') as csvFile:
@@ -396,49 +393,9 @@ def readSuggestions():
                 
             for row in reader:
                 if len(row) != 0 :
-                    #print("row",row)
                     skeletons.append(row[2])
 
         csvFile.close()
     
     
     return set(skeletons)
-    
-
-        
-    
-    
-
-
-"""            
-def createImageOfRules(rules) :
-    
-    for k,v in rules.items() :
-        numberRule = k.replace(".","_")
-        filenamePS = "ihm/rules_image/rule-%s.ps"%numberRule
-        filenamePNG = "ihm/rules_image/rule-%s.png"%numberRule
-    
-        cf = CanvasFrame()
-            
-        tr = Tree.fromstring(v)
-        tc = TreeWidget(cf.canvas(),tr)
-            
-        tc['node_font'] = 'arial 13 bold'
-        tc['leaf_font'] = 'arial 11'
-        tc['node_color'] = '#005990'
-        tc['leaf_color'] = '#3F8F57'
-        tc['line_color'] = '#175252'
-        tc['xspace'] = 25
-        tc['yspace'] = 25
-            
-        cf.add_widget(tc,10,10) # (10,10) offsets
-            
-        cf.print_to_file(filenamePS)
-        cf.destroy()
-            
-        #MagickImage doit etre installée ainsi que convert
-        os.system("convert %s %s" % (filenamePS, filenamePNG))
-        
-if __name__ == "__main__":
-    createImageOfRules(all_rules)  
-"""

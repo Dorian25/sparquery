@@ -81,7 +81,6 @@ class HistoryFrame(Label):
         
         #si le fichier de log existe alors on le lit et rempli le tableau
         if os.path.isfile(self.filepath) :
-            print("exist")
             #avant d'afficher on supprime
             #delimiter "," par defaut
             with open(self.filepath, 'r') as csvFile:
@@ -89,7 +88,6 @@ class HistoryFrame(Label):
                 
                 for row in reader:
                     if len(row) != 0 :
-                        print("row",row)
                         self.tableauHistory.insert("", 'end', values = (row[0],row[1],row[2]))
 
             csvFile.close()
