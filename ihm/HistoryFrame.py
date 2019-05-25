@@ -12,7 +12,7 @@ import os.path
 import csv
 
     
-class HistoryFrame(Label):
+class HistoryFrame(Frame):
     
     
     def __init__(self, parent):
