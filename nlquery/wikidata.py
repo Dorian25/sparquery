@@ -410,190 +410,101 @@ class WikiData(RestAdapter):
 
     def _find_entity(self, qtype, inst, params):
         """Count number of things instance/subclass of inst with props"""
-        
-        answer = WikiDataAnswer(sparql_query=None)
-        
-        inst_id_found = False
-        
-        list_inst_id, sugg_inst = self._get_id(inst, 'item')
-        
-        if not list_inst_id :
-            answer.feedback["inst"] = "I did not find the instance : "+ inst.upper()
-            answer.suggestions["subject"] = sugg_inst
-            inst_id_found = False
-        else :
-            answer.feedback["match_inst"] = "I found "+str(len(list_inst_id))+" result(s) related to the instance : "+ inst.upper()
-            answer.suggestions["subject"] = sugg_inst
-            inst_id_found = True
-            
+        #self.info('Get instances of {0} that are {1}'.format(inst, params))
 
-        if inst_id_found :
-            
-            if qtype == 'how many':
-                select = '(count(*) as ?count)'
-            elif qtype in ['which', 'who']:
-                select = '?valLabel'
-            else:
-                answer.feedback["unknown qtype"] = "The type of question is unknown"
-                return answer
-            
-            print("params",params,len(params))
-            if len(params) == 0 :
-                #pas de propriete dans la question
-                #on ne peut pas enlever l'ambiguité s'il y a plusieurs sujets possibles
-                #donc on considere le premier d'entre eux
-                query = """
-                        SELECT %s
-                        WHERE {
-                        { ?val p:P39 ?pos . # position held
-                            ?pos ps:P39 wd:%s . # pos = inst
-                            ?val wdt:P31 wd:Q5 . # as a human
-                        } UNION 
-                        {
-                          ?val wdt:P31 wd:%s . # instance of 
-                        }
-                        """ % (select, list_inst_id[0], list_inst_id[0])
-                query += 'SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} }'
-                    
-            else :      
-            
-                #on doit chercher le sujet qui possède la propriété (prop)
-                #on doit parcourir toutes les propriétés
-                
-                second_part_query = ""
-                count_prop = 1
-                list_found_prop = []
-                
-                
-                for prop, prop_val, op in params:
-                    
-                    prop_id_found = False
-                    
-                    list_prop_id, sugg_prop = self._get_id(prop, 'property')
-                        
-                    if list_prop_id : 
-                        answer.feedback["match_property"+str(count_prop)] = "I found "+str(len(list_prop_id))+" result(s) related to the property "+str(count_prop)+" : " + prop.upper()
-                        answer.suggestions["prop"] += sugg_prop
-                        prop_id_found = True
-                    else :
-                        answer.feedback["property"+str(count_prop)] = "I did not find the property " + str(count_prop)+" : " + prop.upper()
-                        answer.suggestions["prop"] += sugg_prop
-                        prop_id_found = False
-                        
-                    if prop_id_found :
-                    
-                        if op in ['>', '<']:
-                            
-                            #prop_id,sugg= self._get_id(prop,'property')
-                            
-                            #array d'array = chaque arret correspond à une propriete testé sur la liste des subjects
-                            subjsHaveProps = [[self._is_property_of_subj(s,p) for s in list_inst_id] for p in list_prop_id]
-                            print("tableau prop sub",subjsHaveProps)
-                            inst_id, prop_id = self._find_couple_property_of_subj(subjsHaveProps,list_inst_id,list_prop_id)
-                            
-                            if inst_id and prop_id :
-                                answer.sparql_desc[inst_id] = inst
-                                answer.sparql_desc[prop_id] = prop
-                                print(inst_id,prop_id)
-                    
-                                answer.feedback["link"] = "I found a link between the subject and the property"
-                                #self.info('Count number of {0} where {1} {2} {3}'.format(inst, prop_id, op, prop_val))
-                            
-                                second_part_query += """
-                                ?val wdt:%s ?value FILTER(?value %s %s) . # Filter by value
-                                """ % (prop_id, op, prop_val)
-                            else :
-                                answer.feedback["link"] = "I did not find a link between the subject and the property"
-                                    
-                                    
-                        elif op in ['in', 'by', 'of', 'from']:
-                            if op == 'in' and prop_val.isdigit():
-                                iso_time = parse(prop_val).isoformat()
-            
-                                second_part_query += """
-                                ?pos pq:P580 ?startDate . # pos.startDate
-                                ?pos pq:P582 ?endDate . # pos.endDate
-                                FILTER (?startDate < "%s"^^xsd:dateTime && ?endDate > "%s"^^xsd:dateTime)
-                                """ % (iso_time, iso_time)
-                            elif op == 'of' and prop_val:
-                                #prop_val_id,sugg = self._get_id(prop_val)
-            
-                                second_part_query += """
-                                ?pos pq:P108 wd:%s . # pos.employer
-                                """ % (prop_id)
-                            else:
-                                # Get value entity
-                                prop_val_id,sugg = self._get_id(prop_val)
-            
-                                if prop:
-                                    # Get property id
-                                    if prop in ['died', 'killed'] and op in ['from', 'by', 'of']:
-                                        # slight hack because lookup for died defaults to place of death
-                                        # cause of death
-                                        prop_id = 'P509'
-                                    else:
-                                        prop_id,sugg = self._get_id(prop, 'property')
-                                    second_part_query += '?val wdt:%s wd:%s .\n' % (prop_id, prop_val_id)
-                                else:
-                                    # Infer property from value (e.g. How many countries are in China?)
-                                    # e.g. infer: How many countries with continent China?
-                                    prop_id = '*'
-                                    second_part_query += """
-                                             wd:%s wdt:P31 ?instance . # Get entities that value is an instance of. Ex: ?instance = wd:Q5107 (continent)
-                                             ?instance wdt:P1687 ?propEntity . # instance of Entity to property. Ex: ?propEntity = wd:P30 (continent)
-                                             ?propEntity wikibase:directClaim ?prop . # wd to wdt. Ex: ?prop = wdt:P30 (continent)
-                                             ?val ?prop wd:%s .
-                                             """ % (prop_val_id, prop_val_id)
-                                self.info('Count number of {0} where {1}={2}'.format(
-                                    inst, prop_id, prop_val_id))
-                            
-                    count_prop += 1  
-                    list_found_prop.append(prop_id_found)
-                    #fin boucle for
-                    
-                    
-                    
-                    
-                if False not in list_found_prop and len(list_found_prop) > 0:
-                    #fin boucle for
-                    #on regroupe les 2 parties de la requetes
-                    query = """
-                            SELECT %s
-                            WHERE {
-                            { ?val p:P39 ?pos . # position held
-                                ?pos ps:P39 wd:%s . # pos = inst
-                                ?val wdt:P31 wd:Q5 . # as a human
-                            } UNION 
-                            {
-                              ?val wdt:P31 wd:%s . # instance of 
-                            }
-                            """ % (select, inst_id, inst_id)
-                            
-                    query += second_part_query
-            
-            
-                    query += 'SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} }'
-                        
-            answer.sparql_query = query
-    
-            try:
-                data = self._query_wdsparql(query)
-            except ValueError:
-                self.error('Error parsing data')
-                return answer
-    
-            if qtype == 'how many':
-                answer.data = dget(data, 'results.bindings.0.count.value')
-            elif qtype in ['which', 'who']:
-                bindings = dget(data, 'results.bindings')
-                answer.bindings = bindings
-                answer.data = WikiDataAnswer.get_data(bindings)
-                
-        else :
-            uyguygyug = 0
-            
-            
-        return answer
+        inst_id,sugg = self._get_id(inst)
+
+        if not inst_id:
+            noAnswer = WikiDataAnswer("")
+            noAnswer.feedback["subject"] = "I don't find the subject : "+ inst
+            return noAnswer
+
+        if qtype == 'how many':
+            select = '(count(*) as ?count)'
+        elif qtype in ['which', 'who']:
+            select = '?valLabel'
+        else:
+            self.warn('Qtype {0} not known'.format(qtype))
+            return None
+
+        query = """
+                SELECT %s
+                WHERE {
+                { ?val p:P39 ?pos . # position held
+                    ?pos ps:P39 wd:%s . # pos = inst
+                    ?val wdt:P31 wd:Q5 . # as a human
+                } UNION 
+                {
+                  ?val wdt:P31 wd:%s . # instance of 
+                }
+                """ % (select, inst_id, inst_id)
+
+        for prop, prop_val, op in params:
+            if op in ['>', '<']:
+                prop_id,sugg = self._get_id(prop, 'property')
+                self.info('Count number of {0} where {1} {2} {3}'.format(
+                    inst, prop_id, op, prop_val))
+                query += """
+                        ?val wdt:%s ?value FILTER(?value %s %s) . # Filter by value
+                        """ % (prop_id, op, prop_val)
+            elif op in ['in', 'by', 'of', 'from']:
+                if op == 'in' and prop_val.isdigit():
+                    iso_time = parse(prop_val).isoformat()
+
+                    query += """
+                    ?pos pq:P580 ?startDate . # pos.startDate
+                    ?pos pq:P582 ?endDate . # pos.endDate
+                    FILTER (?startDate < "%s"^^xsd:dateTime && ?endDate > "%s"^^xsd:dateTime)
+                    """ % (iso_time, iso_time)
+                elif op == 'of' and prop_val:
+                    prop_val_id,sugg = self._get_id(prop_val)
+
+                    query += """
+                    ?pos pq:P108 wd:%s . # pos.employer
+                    """ % (prop_val_id)
+                else:
+                    # Get value entity
+                    prop_val_id,sugg = self._get_id(prop_val)
+
+                    if prop:
+                        # Get property id
+                        if prop in ['died', 'killed'] and op in ['from', 'by', 'of']:
+                            # slight hack because lookup for died defaults to place of death
+                            # cause of death
+                            prop_id = 'P509'
+                        else:
+                            prop_id,sugg = self._get_id(prop, 'property')
+                        query += '?val wdt:%s wd:%s .\n' % (prop_id, prop_val_id)
+                    else:
+                        # Infer property from value (e.g. How many countries are in China?)
+                        # e.g. infer: How many countries with continent China?
+                        prop_id = '*'
+                        query += """
+                                 wd:%s wdt:P31 ?instance . # Get entities that value is an instance of. Ex: ?instance = wd:Q5107 (continent)
+                                 ?instance wdt:P1687 ?propEntity . # instance of Entity to property. Ex: ?propEntity = wd:P30 (continent)
+                                 ?propEntity wikibase:directClaim ?prop . # wd to wdt. Ex: ?prop = wdt:P30 (continent)
+                                 ?val ?prop wd:%s .
+                                 """ % (prop_val_id, prop_val_id)
+                    self.info('Count number of {0} where {1}={2}'.format(
+                        inst, prop_id, prop_val_id))
+
+        query += 'SERVICE wikibase:label { bd:serviceParam wikibase:language "en"} }'
+        result = {
+            'sparql_query': query,
+        }
+
+        try:
+            data = self._query_wdsparql(query)
+        except ValueError:
+            self.error('Error parsing data')
+            return WikiDataAnswer(**result)
+
+        if qtype == 'how many':
+            result['data'] = dget(data, 'results.bindings.0.count.value')
+        elif qtype in ['which', 'who']:
+            result['bindings'] = dget(data, 'results.bindings')
+
+        return WikiDataAnswer(**result)
 
 
 
